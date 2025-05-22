@@ -1,0 +1,1181 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=350, initial-scale=1, maximum-scale=1, user-scalable=no" />
+<title>Aplikasi Monitoring Keuangan</title>
+<style>
+  /* Reset & Base */
+  * {
+    margin: 0; padding: 0; box-sizing: border-box;
+  }
+  body, html {
+    height: 100%;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: #e3f2fd; /* Blue background */
+    overflow-x: hidden;
+    -webkit-user-select: none;
+  }
+  button {
+    cursor: pointer;
+    border: none;
+    outline: none;
+    background: transparent;
+    font-family: inherit;
+  }
+  input, select {
+    font-family: inherit;
+  }
+
+  /* App Layout */
+  .app {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    overflow: hidden;
+    background: #fff;
+    color: #212121;
+    position: relative;
+    width: 350px; /* Set width for Android */
+  }
+
+  /* Header */
+  header.header {
+    height: 48px;
+    background: #219653;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 16px;
+    font-weight: 600;
+    font-size: 1.25rem;
+    box-shadow: 0 2px 6px rgb(33 150 83 / 0.3);
+    user-select: none;
+  }
+  header.header div.title-left {
+    flex-grow: 1;
+    text-align: left;
+  }
+  header.header .settings-button {
+    width: 28px; height: 28px;
+    fill: white;
+    cursor: pointer;
+    transition: fill 0.3s ease;
+    background: none;
+    border-radius: 50%;
+    border: none;
+  }
+  header.header .settings-button:hover {
+    fill: #a5d6a7;
+  }
+
+  /* Content Wrapper for swipe and slide */
+  .content-wrapper {
+    flex: 1;
+    position: relative;
+    overflow: hidden;
+    touch-action: pan-y;
+  }
+  .content {
+    display: flex;
+    height: 100%;
+    transition: transform 0.3s ease-in-out;
+    will-change: transform;
+  }
+
+  /* Tab Content */
+  .tab-content {
+    flex: 0 0 100%;
+    overflow-y: auto;
+    padding: 16px;
+    background: #fff;
+  }
+
+  /* Dashboard Styles */
+  .saldo-display {
+    font-size: 2rem;
+    font-weight: 700;
+    color: white;
+    text-align: center;
+    margin: 24px 0 8px;
+    user-select: none;
+    animation: fadeIn 0.6s ease;
+    background: linear-gradient(135deg, #2196F3 0%, #1976D2 100%);
+    padding: 14px 0;
+    border-radius: 20px;
+    box-shadow: 0 4px 15px rgba(33,150,243,0.6);
+    transition: all 0.3s ease;
+  }
+  .pemasukan-pengeluaran {
+    display: flex;
+    justify-content: space-around;
+    font-weight: 600;
+    margin-bottom: 20px;
+  }
+  .pemasukan-pengeluaran > div {
+    text-align: center;
+    font-size: 1rem;
+    user-select: none;
+    padding: 12px 24px;
+    border-radius: 30px;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+    background: white; /* Background white */
+    border-left: 8px solid; /* Left border for color indication */
+    color: #333;
+    font-weight: 700;
+    transition: all 0.3s ease;
+  }
+  .pemasukan {
+    border-left-color: #4caf50; /* Green for pemasukan */
+  }
+  .pengeluaran {
+    border-left-color: #f44336; /* Red for pengeluaran */
+  }
+
+  /* Time Buttons */
+  .time-buttons {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 16px;
+    gap: 16px;
+  }
+  .time-button {
+    padding: 10px 26px;
+    font-weight: 700;
+    border-radius: 30px;
+    border: 2.5px solid #cacaca;
+    background-color: transparent;
+    color: #444;
+    user-select: none;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.07);
+    letter-spacing: 0.02em;
+    transition: all 0.35s ease;
+  }
+  .time-button.active {
+    border-color: #2e7d32;
+    background-color: #388e3c;
+    color: white;
+    box-shadow: 0 10px 24px rgba(56,142,60,0.5);
+  }
+  .time-button:hover:not(.active) {
+    border-color: #4caf50;
+    color: #2e7d32;
+    box-shadow: 0 6px 15px rgba(76,175,80,0.3);
+  }
+
+  /* Grafik Container */
+  .grafik {
+    height: 190px;
+    margin-bottom: 16px;
+  }
+
+  /* Daily Display below grafik */
+  .daily-display {
+    display: flex;
+    justify-content: space-around;
+    margin-bottom: 24px;
+  }
+  .daily-display > div {
+    border-radius: 18px;
+    padding: 14px 20px;
+    width: 160px;
+    font-weight: 700;
+    text-align: center;
+    color: white;
+    user-select: none;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+    background: linear-gradient(135deg, #4caf50 0%, #2e7d32 100%);
+    transition: box-shadow 0.3s ease, transform 0.3s ease;
+  }
+  .daily-pemasukan {
+    background: linear-gradient(135deg, #4caf50 0%, #2e7d32 100%);
+  }
+  .daily-pengeluaran {
+    background: linear-gradient(135deg, #ef5350 0%, #b71c1c 100%);
+  }
+  .daily-display > div:hover {
+    box-shadow: 0 12px 28px rgba(0,0,0,0.2);
+    transform: translateY(-8px);
+  }
+
+  /* Navigator Bottom with bigger labels */
+  nav.navigator {
+    height: 56px;
+    background: #fff;
+    box-shadow: 0 -2px 8px rgb(0 0 0 / 0.12);
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    font-weight: 600;
+    user-select: none;
+  }
+  nav.navigator button {
+    background: none;
+    color: #575757;
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    font-size: 0.9rem; /* Increased font size */
+    position: relative;
+    transition: color 0.35s ease;
+  }
+  nav.navigator button.active,
+  nav.navigator button:hover {
+    color: #2e7d32;
+  }
+  nav.navigator button .icon {
+    width: 24px;
+    height: 24px;
+    margin-bottom: 4px;
+    transition: transform 0.33s ease;
+  }
+  nav.navigator button.active .icon {
+    transform: scale(1.3) rotate(12deg);
+    fill: #2e7d32;
+  }
+  nav.navigator button:hover .icon {
+    fill: #388e3c;
+  }
+
+  /* Transaksi Tab */
+  .transaksi-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 24px;
+    margin-top: 100px; /* Default center */
+    user-select: none;
+    transition: margin-top 0.3s ease;
+  }
+  .transaksi-buttons.top-position {
+    margin-top: 8px; /* Move buttons to top when active */
+  }
+  .transaksi-button {
+    font-weight: 700;
+    border-radius: 30px;
+    width: 140px;
+    height: 56px;
+    font-size: 1.1rem;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    box-shadow: 0 8px 18px rgba(0,0,0,0.12);
+    transition: box-shadow 0.3s ease, transform 0.3s ease, background-color 0.3s ease;
+    user-select: none;
+  }
+  .transaksi-button:hover {
+    box-shadow: 0 16px 28px rgba(0,0,0,0.25);
+    transform: translateY(-6px);
+  }
+  .transaksi-button.active {
+    transform: translateY(-6px);
+    box-shadow: 0 16px 32px rgba(0,0,0,0.4);
+  }
+  .transaksi-button .icon {
+    width: 24px;
+    height: 24px;
+    flex-shrink: 0;
+  }
+  .pemasukan-button {
+    background: linear-gradient(135deg, #66bb6a 0%, #2e7d32 100%);
+    animation: pulseGreen 2.5s infinite;
+  }
+  .pengeluaran-button {
+    background: linear-gradient(135deg, #ef5350 0%, #b71c1c 100%);
+    animation: pulseRed 2.5s infinite;
+  }
+  @keyframes pulseGreen {
+    0%, 100% { box-shadow: 0 0 15px #66bb6a; }
+    50% { box-shadow: 0 0 30px #2e7d32; }
+  }
+  @keyframes pulseRed {
+    0%, 100% { box-shadow: 0 0 15px #ef5350; }
+    50% { box-shadow: 0 0 30px #b71c1c; }
+  }
+
+  /* Input form container */
+  .input-form-container {
+    padding: 0 24px;
+    margin-top: 30px;
+  }
+  .input-form {
+    display: none;
+    flex-direction: column;
+    gap: 12px;
+    animation: fadeIn 0.3s ease forwards;
+  }
+  .input-form label {
+    font-weight: 700;
+    color: #444;
+    user-select: none;
+  }
+  .input-form input[type="number"],
+  .input-form input[type="date"],
+  .input-form input[type="text"] {
+    font-size: 1rem;
+    padding: 10px 14px;
+    border-radius: 10px;
+    border: 1.8px solid #ccc;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  }
+  .input-form input[type="number"]:focus,
+  .input-form input[type="date"]:focus,
+  .input-form input[type="text"]:focus {
+    outline: none;
+    border-color: #2e7d32;
+    box-shadow: 0 0 9px rgba(46,125,50,0.6);
+  }
+  .simpan-button {
+    background-color: #2e7d32;
+    color: white;
+    padding: 14px 0;
+    font-weight: 700;
+    border-radius: 28px;
+    box-shadow: 0 6px 18px rgba(46,125,50,0.6);
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+    user-select: none;
+  }
+  .simpan-button:hover {
+    background-color: #1b3d16;
+    box-shadow: 0 10px 28px rgba(27,61,22,0.7);
+  }
+
+  /* Kategori Tag Buttons */
+  .kategori-tags {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 14px;
+    margin-top: 8px;
+  }
+  .kategori-tag {
+    background: #e0e0e0;
+    color: #444;
+    font-weight: 600;
+    padding: 8px 16px;
+    border-radius: 24px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    user-select: none;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+  }
+  .kategori-tag svg {
+    width: 22px;
+    height: 22px;
+  }
+  .kategori-tag:hover {
+    background-color: #bfbfbf;
+    transform: scale(1.08);
+  }
+  .kategori-tag.selected {
+    background-color: #219653;
+    color: white;
+  }
+
+  /* Filter and Search */
+  .filter {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 12px;
+    align-items: center;
+  }
+  .filter > select,
+  .filter > input[type="date"] {
+    flex: 1 1 140px;
+    padding: 10px 14px;
+    font-size: 1rem;
+    border-radius: 16px;
+    border: 1.5px solid #ccc;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  }
+  .filter > select:focus,
+  .filter > input[type="date"]:focus {
+    outline: none;
+    border-color: #2e7d32;
+    box-shadow: 0 0 8px rgba(46,125,50,0.5);
+  }
+  #search-category {
+    margin-top: 8px;
+    width: 100%;
+    padding: 12px 16px;
+    font-size: 1rem;
+    border-radius: 24px;
+    border: 2px solid #ccc;
+    box-shadow: 0 0 6px rgba(0,0,0,0.05);
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  }
+  #search-category:focus {
+    outline: none;
+    border-color: #219653;
+    box-shadow: 0 0 12px rgba(33,150,83,0.6);
+  }
+
+  /* History List */
+  .history-list {
+    max-height: calc(100vh - 290px);
+    overflow-y: auto;
+  }
+  .history-item {
+    border-radius: 16px;
+    padding: 16px 12px 16px 20px;
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #f8f9f9;
+    box-shadow: 0 0 15px rgb(0 0 0 / 0.07);
+    transition: background-color 0.3s ease, transform 0.3s ease;
+  }
+  .history-item:hover {
+    background-color: #e8f5e9;
+    transform: translateY(-4px);
+  }
+  .history-left {
+    display: flex;
+    align-items: center;
+  }
+  .kategori-icon {
+    width: 28px;
+    height: 28px;
+    margin-right: 14px;
+    flex-shrink: 0;
+  }
+  .detail {
+    display: flex;
+    flex-direction: column;
+  }
+  .detail > span:first-child {
+    font-weight: 600;
+    font-size: 1rem;
+  }
+  .detail > small {
+    font-size: 0.75rem;
+    color: #666;
+  }
+  .amount {
+    font-weight: 700;
+    font-size: 1.15rem;
+    min-width: 100px;
+    text-align: right;
+  }
+  .text-green { color: #27ae60; }
+  .text-red { color: #eb5757; }
+
+  /* Kontainer untuk tombol aksi edit/hapus */
+  .actions {
+    display: flex;
+    gap: 12px;
+    margin-left: 16px;
+  }
+  .action-btn {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 4px;
+    transition: transform 0.2s ease;
+  }
+  .action-btn:hover {
+    transform: scale(1.2);
+  }
+  .action-btn svg {
+    width: 20px;
+    height: 20px;
+    fill: #666;
+  }
+  .action-btn.edit svg {
+    fill: #2196f3;
+  }
+  .action-btn.delete svg {
+    fill: #e53935;
+  }
+
+  /* Animations */
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  @keyframes slideIn {
+    from { transform: translateY(-20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+
+</style>
+</head>
+<body>
+  <div class="app" id="app" role="main" aria-label="Aplikasi monitoring keuangan">
+
+    <!-- HEADER -->
+    <header class="header">
+      <div style="width:40px;"></div>
+      <div class="title-left">Keuangan</div>
+      <button class="settings-button" title="Pengaturan" aria-label="Pengaturan">
+        <!-- Gear SVG icon -->
+        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false" width="24" height="24" >
+          <path d="M19.43 12.98c.04-.32.07-.65.07-.98s-.02-.66-.07-.98l2.11-1.65a.5.5 0 00.11-.63l-2-3.46a.5.5 0 00-.6-.22l-2.49 1a7.03 7.03 0 00-1.7-.98l-.38-2.65A.5.5 0 0014 3h-4a.5.5 0 00-.5.43l-.38 2.65a7.08 7.08 0 00-1.7.98l-2.49-1a.5.5 0 00-.6.22l-2 3.46a.5.5 0 00.11.63l2.11 1.65c-.05.32-.07.65-.07.98s.02.66.07.98L2.07 14.63a.5.5 0 00-.11.63l2 3.46a.5.5 0 00.6.22l2.49-1a7.03 7.03 0 001.7.98l.38 2.65a.5.5 0 00.5.43h4a.5.5 0 00.5-.43l.38-2.65a7.08 7.08 0 001.7-.98l2.49 1a.5.5 0 00.6-.22l2-3.46a.5.5 0 00-.11-.63l-2.12-1.65zM12 15.5A3.5 3.5 0 1115.5 12 3.5 3.5 0 0112 15.5z"/>
+        </svg>
+      </button>
+    </header>
+
+    <!-- TAB CONTENT WRAPPER -->
+    <div class="content-wrapper" id="content-wrapper" tabindex="0" aria-live="polite" aria-atomic="true">
+      <div class="content" id="content">
+
+        <!-- DASHBOARD TAB -->
+        <section class="tab-content" id="tab-dashboard" role="tabpanel" aria-hidden="false" aria-label="Dashboard">
+          <div class="saldo-display" aria-live="polite" aria-atomic="true">Saldo: RP 100.000.000</div>
+          <div class="pemasukan-pengeluaran" aria-label="Pemasukan dan Pengeluaran Total">
+            <div class="pemasukan" aria-label="Pemasukan Total">Pemasukan: RP 100.000.000</div>
+            <div class="pengeluaran" aria-label="Pengeluaran Total">Pengeluaran: RP 100.000.000</div>
+          </div>
+          <div class="time-buttons" role="tablist" aria-label="Periode Grafik Pemasukan dan Pengeluaran">
+            <button class="time-button active" data-timeframe="minggu" role="tab" aria-selected="true" tabindex="0">Minggu</button>
+            <button class="time-button" data-timeframe="bulan" role="tab" aria-selected="false" tabindex="-1">Bulan</button>
+            <button class="time-button" data-timeframe="tahun" role="tab" aria-selected="false" tabindex="-1">Tahun</button>
+          </div>
+          <div class="grafik" aria-label="Grafik pemasukan dan pengeluaran">
+            <canvas id="chartCanvas" width="100%" height="180" aria-hidden="true"></canvas>
+          </div>
+          <div class="daily-display" aria-label="Pemasukan dan Pengeluaran Hari Ini">
+            <div class="daily-pemasukan" aria-label="Pemasukan Hari Ini">Pemasukan Hari Ini: RP 9.000.000</div>
+            <div class="daily-pengeluaran" aria-label="Pengeluaran Hari Ini">Pengeluaran Hari Ini: RP 9.000.000</div>
+          </div>
+        </section>
+
+        <!-- TRANSAKSI TAB -->
+        <section class="tab-content" id="tab-transaksi" role="tabpanel" aria-hidden="true" aria-label="Transaksi">
+          <div class="transaksi-buttons" role="tablist" aria-label="Jenis Transaksi">
+            <button class="transaksi-button pemasukan-button active" data-type="pemasukan" aria-selected="true" tabindex="0" aria-controls="input-form">
+              <svg class="icon" viewBox="0 0 24 24" fill="white" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false"><path d="M12 2v20m10-10H2" stroke="white" stroke-width="2" stroke-linecap="round"/></svg>
+              Pemasukan
+            </button>
+            <button class="transaksi-button pengeluaran-button" data-type="pengeluaran" aria-selected="false" tabindex="-1" aria-controls="input-form">
+              <svg class="icon" viewBox="0 0 24 24" fill="white" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false"><path d="M2 12h20" stroke="white" stroke-width="2" stroke-linecap="round"/></svg>
+              Pengeluaran
+            </button>
+          </div>
+          <div class="input-form-container">
+            <form class="input-form" id="input-form" aria-live="polite" aria-label="Form Input Transaksi" novalidate>
+              <label for="jumlah">Jumlah (RP)</label>
+              <input type="number" id="jumlah" name="jumlah" required min="1" placeholder="Masukkan jumlah Rp" autocomplete="off" aria-required="true" />
+
+              <label for="tanggal">Tanggal</label>
+              <input type="date" id="tanggal" name="tanggal" required aria-required="true" />
+
+              <label>Kategori</label>
+              <div class="kategori-tags" role="list" aria-label="Daftar Kategori Tag" id="kategori-tags">
+                <button type="button" class="kategori-tag selected" data-value="gaji" aria-pressed="true" role="listitem" aria-label="Gaji">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="#2d9cdb" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false"> 
+                    <path d="M12 11c-1.657 0-3-1.343-3-3 0-.063.007-.123.011-.183L5 7v3H3v4h2v3l4-1v-1.816A3.002 3.002 0 0012 17c1.657 0 3-1.343 3-3s-1.343-3-3-3z"/>
+                  </svg>Gaji
+                </button>
+                <button type="button" class="kategori-tag" data-value="belanja" aria-pressed="false" role="listitem" aria-label="Belanja">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="#f2994a" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+                    <path d="M6 6h15l-1.5 9h-12z"/>
+                    <circle cx="9" cy="21" r="1"/>
+                    <circle cx="19" cy="21" r="1"/>
+                  </svg>Belanja
+                </button>
+                <button type="button" class="kategori-tag" data-value="bayar" aria-pressed="false" role="listitem" aria-label="Bayar">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="#56ccf2" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+                    <rect x="4" y="7" width="16" height="10" rx="2"/>
+                    <path d="M4 7l8 5 8-5"/>
+                  </svg>Bayar
+                </button>
+                <button type="button" class="kategori-tag" data-value="tabung" aria-pressed="false" role="listitem" aria-label="Tabung">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="#6fcf97" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+                    <path d="M12 2a7 7 0 00-7 7c0 2.83 2.029 5.15 4.75 5.82v2.18H7v2h10v-2h-2.75v-2.18C16.97 14.15 19 11.83 19 9a7 7 0 00-7-7z"/>
+                  </svg>Tabung
+                </button>
+                <button type="button" class="kategori-tag" data-value="lainnya" aria-pressed="false" role="listitem" aria-label="Lainnya">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="#bb6bd9" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+                    <circle cx="12" cy="12" r="10"/>
+                    <text x="12" y="16" text-anchor="middle" font-size="12" fill="white" font-family="Arial" font-weight="bold">?</text>
+                  </svg>Lainnya
+                </button>
+              </div>
+
+              <input type="text" id="kategori-custom" name="kategori-custom" placeholder="Masukkan kategori sendiri" autocomplete="off" style="display:none; margin-top: 10px;" aria-label="Input kategori lainnya" />
+
+              <button type="submit" class="simpan-button" aria-label="Simpan Transaksi">Simpan</button>
+            </form>
+          </div>
+        </section>
+
+        <!-- HISTORY TAB -->
+        <section class="tab-content" id="tab-history" role="tabpanel" aria-hidden="true" aria-label="History Transaksi">
+          <div class="filter" aria-label="Filter Transaksi">
+            <select id="filter-select" aria-label="Pilih filter">
+              <option value="semua">Semua</option>
+              <option value="tanggal">Tanggal</option>
+              <option value="bulan">Bulan</option>
+              <option value="tahun">Tahun</option>
+            </select>
+            <input type="date" id="filter-date" aria-label="Pilih tanggal" />
+          </div>
+          <input type="search" id="search-category" placeholder="Cari kategori transaksi" aria-label="Cari kategori transaksi" />
+          <div class="history-list" id="history-list" role="list" aria-live="polite" aria-atomic="true" tabindex="0">
+            <!-- Item history akan muncul disini -->
+          </div>
+        </section>
+
+      </div>
+    </div>
+
+    <!-- NAVIGATOR BOTTOM -->
+    <nav class="navigator" role="tablist" aria-label="Navigasi utama aplikasi">
+      <button role="tab" aria-selected="true" tabindex="0" class="nav-button active" data-target="dashboard" aria-controls="tab-dashboard">
+        <svg class="icon" viewBox="0 0 24 24" fill="#575757" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+          <path d="M3 13h8V3H3v10zm10 8h8v-6h-8v6zM3 21h8v-6H3v6zm10-16h8v6h-8V5z"/>
+        </svg>Dashboard
+      </button>
+      <button role="tab" aria-selected="false" tabindex="-1" class="nav-button" data-target="transaksi" aria-controls="tab-transaksi">
+        <svg class="icon" viewBox="0 0 24 24" fill="#575757" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+          <path d="M9 17v-2h6v2H9zm0-6v-2h6v2H9z"/>
+          <path d="M3 19h18v-2H3v2zm0-10h18v-2H3v2z"/>
+        </svg>Transaksi
+      </button>
+      <button role="tab" aria-selected="false" tabindex="-1" class="nav-button" data-target="history" aria-controls="tab-history">
+        <svg class="icon" viewBox="0 0 24 24" fill="#575757" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+          <path d="M13 3a9 9 0 11-1 17.83V12H8l5-5-5-5h5z"/>
+        </svg>History
+      </button>
+    </nav>
+
+  </div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  (() => {
+    const app = document.getElementById('app');
+    const content = document.getElementById('content');
+    const navButtons = document.querySelectorAll('nav.navigator .nav-button');
+    const tabContents = document.querySelectorAll('.tab-content');
+    const timeButtons = document.querySelectorAll('.time-button');
+    const chartCanvas = document.getElementById('chartCanvas').getContext('2d');
+    const transaksiButtons = document.querySelectorAll('.transaksi-button');
+    const transaksiBtnContainer = document.querySelector('.transaksi-buttons');
+    const inputForm = document.getElementById('input-form');
+    const kategoriTagsContainer = document.getElementById('kategori-tags');
+    const kategoriCustom = document.getElementById('kategori-custom');
+    const filterSelect = document.getElementById('filter-select');
+    const filterDate = document.getElementById('filter-date');
+    const searchCategory = document.getElementById('search-category');
+    const historyList = document.getElementById('history-list');
+    const tanggalInput = document.getElementById('tanggal');
+
+    // Setup initial date for inputs
+    const todayISO = new Date().toISOString().split('T')[0];
+    tanggalInput.value = todayISO;
+    filterDate.value = todayISO;
+
+    // State
+    let activeTab = 'dashboard';
+    let activeTimeframe = 'minggu';
+    let transaksiType = 'pemasukan';
+
+    // Transactions sample data
+    let transactions = [
+      {id:1,type:'pemasukan', amount:9000000, date:'2024-06-06', category:'gaji', desc:'Gaji Bulanan'},
+      {id:2,type:'pengeluaran', amount:3500000, date:'2024-06-05', category:'belanja', desc:'Belanja bulanan'},
+      {id:3,type:'pengeluaran', amount:4500000, date:'2024-06-06', category:'bayar', desc:'Bayar listrik'},
+    ];
+
+    // Icon/color maps for kategori tags and history
+    const kategoriMap = {
+      gaji: {color:'#2d9cdb', icon: `<svg width="20" height="20" viewBox="0 0 24 24" fill="#2d9cdb" xmlns="http://www.w3.org/2000/svg"><path d="M12 11c-1.657 0-3-1.343-3-3 0-.063.007-.123.011-.183L5 7v3H3v4h2v3l4-1v-1.816A3.002 3.002 0 0012 17c1.657 0 3-1.343 3-3s-1.343-3-3-3z"/></svg>`},
+      belanja: {color:'#f2994a', icon: `<svg width="20" height="20" viewBox="0 0 24 24" fill="#f2994a" xmlns="http://www.w3.org/2000/svg"><path d="M6 6h15l-1.5 9h-12z"/><circle cx="9" cy="21" r="1"/><circle cx="19" cy="21" r="1"/></svg>`},
+      bayar: {color:'#56ccf2', icon: `<svg width="20" height="20" viewBox="0 0 24 24" fill="#56ccf2" xmlns="http://www.w3.org/2000/svg"><rect x="4" y="7" width="16" height="10" rx="2"/><path d="M4 7l8 5 8-5"/></svg>`},
+      tabung: {color:'#6fcf97', icon: `<svg width="20" height="20" viewBox="0 0 24 24" fill="#6fcf97" xmlns="http://www.w3.org/2000/svg"><path d="M12 2a7 7 0 00-7 7c0 2.83 2.029 5.15 4.75 5.82v2.18H7v2h10v-2h-2.75v-2.18C16.97 14.15 19 11.83 19 9a7 7 0 00-7-7z"/></svg>`},
+      lainnya: {color:'#bb6bd9', icon: `<svg width="20" height="20" viewBox="0 0 24 24" fill="#bb6bd9" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="10"/><text x="12" y="16" text-anchor="middle" font-size="12" fill="white" font-family="Arial" font-weight="bold">?</text></svg>`},
+    };
+
+    // Format currency in IDR
+    function formatCurrency(num) {
+      return 'RP ' + num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+    }
+
+    // Switch tabs with animation
+    function switchTab(target) {
+      activeTab = target;
+      content.style.transform = `translateX(-${['dashboard','transaksi','history'].indexOf(target)*100}%)`;
+      tabContents.forEach(tc => {
+        tc.setAttribute('aria-hidden', tc.id !== 'tab-' + target);
+      });
+      navButtons.forEach(btn => {
+        const isActive = btn.dataset.target === target;
+        btn.classList.toggle('active', isActive);
+        btn.setAttribute('aria-selected', isActive);
+        btn.tabIndex = isActive ? 0 : -1;
+      });
+      setTimeout(() => {
+        if(target === 'transaksi') {
+          resetTransaksiButtons();
+          transaksiBtnContainer.classList.remove('top-position'); // Reset on tab switch
+        } else {
+          inputForm.style.display = 'none';
+          transaksiButtons.forEach(b => b.style.display = 'flex');
+          transaksiBtnContainer.classList.remove('top-position');
+          editMode = false; editId = null;
+        }
+      }, 300);
+      updateNavIconColors();
+    }
+
+    // Update nav icon colors dynamically
+    function updateNavIconColors() {
+      navButtons.forEach(btn => {
+        let icon = btn.querySelector('.icon');
+        if(!icon) return;
+        icon.style.fill = btn.classList.contains('active') ? '#2e7d32' : '#575757';
+      });
+    }
+
+    // Reset transaksi buttons UI
+    function resetTransaksiButtons() {
+      transaksiType = 'pemasukan';
+      transaksiButtons.forEach(b => {
+        b.style.display = 'flex';
+        b.classList.toggle('active', b.dataset.type === transaksiType);
+        b.setAttribute('aria-selected', b.dataset.type === transaksiType);
+        b.tabIndex = b.dataset.type === transaksiType ? 0 : -1;
+      });
+      inputForm.style.display = 'none';
+      kategoriCustom.style.display = 'none';
+      kategoriCustom.value = '';
+      kategoriTagsSetSelection('gaji');
+      inputForm.jumlah.value = '';
+      inputForm.tanggal.value = todayISO;
+      transaksiBtnContainer.classList.remove('top-position');
+      editMode = false; editId = null;
+    }
+
+    // Nav button click events
+    navButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        if(btn.dataset.target !== activeTab) switchTab(btn.dataset.target);
+      });
+      btn.addEventListener('keyup', e => {
+        if((e.key === 'Enter' || e.key === ' ') && btn.dataset.target !== activeTab) {
+          switchTab(btn.dataset.target);
+          e.preventDefault();
+        }
+      });
+    });
+
+    // Timeframe buttons click
+    timeButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        if(!btn.classList.contains('active')) {
+          timeButtons.forEach(b => {
+            b.classList.remove('active');
+            b.setAttribute('aria-selected', false);
+            b.tabIndex = -1;
+          });
+          btn.classList.add('active');
+          btn.setAttribute('aria-selected', true);
+          btn.tabIndex = 0;
+          activeTimeframe = btn.dataset.timeframe;
+          updateChart(activeTimeframe);
+        }
+      });
+    });
+
+    // Handle transaksi buttons click
+    transaksiButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        transaksiType = btn.dataset.type;
+        transaksiButtons.forEach(b => {
+          b.style.display = (b === btn) ? 'flex' : 'none';
+          b.classList.toggle('active', b === btn);
+          b.setAttribute('aria-selected', b === btn);
+          b.tabIndex = b === btn ? 0 : -1;
+        });
+        transaksiBtnContainer.classList.add('top-position');
+        inputForm.style.display = 'flex';
+        inputForm.jumlah.value = '';
+        inputForm.tanggal.value = todayISO;
+        kategoriCustom.style.display = 'none';
+        kategoriCustom.value = '';
+        kategoriTagsSetSelection('gaji');
+        editMode = false; editId = null;
+      });
+    });
+
+    // Kategori tags clickable buttons
+    function kategoriTagsSetSelection(value) {
+      Array.from(kategoriTagsContainer.children).forEach(btn => {
+        const isSelected = btn.dataset.value === value;
+        btn.classList.toggle('selected', isSelected);
+        btn.setAttribute('aria-pressed', isSelected);
+      });
+      if(value === 'lainnya') {
+        kategoriCustom.style.display = 'block';
+        kategoriCustom.focus();
+      } else {
+        kategoriCustom.style.display = 'none';
+      }
+    }
+    kategoriTagsContainer.addEventListener('click', e => {
+      if(e.target.classList.contains('kategori-tag')) {
+        const val = e.target.dataset.value;
+        kategoriTagsSetSelection(val);
+      }
+      if(e.target.parentElement && e.target.parentElement.classList.contains('kategori-tag')) {
+        const val = e.target.parentElement.dataset.value;
+        kategoriTagsSetSelection(val);
+      }
+    });
+
+    // Edit mode vars
+    let editMode = false;
+    let editId = null;
+
+    // Input form submit with edit handling
+    inputForm.addEventListener('submit', e => {
+      e.preventDefault();
+      const jumlah = Number(inputForm.jumlah.value);
+      const tanggal = inputForm.tanggal.value;
+      let kategori = null;
+      Array.from(kategoriTagsContainer.children).forEach(btn => {
+        if(btn.classList.contains('selected')) kategori = btn.dataset.value;
+      });
+      if(kategori === 'lainnya') {
+        kategori = kategoriCustom.value.trim() || 'lainnya';
+      }
+      if(!jumlah || !tanggal || !kategori) {
+        alert('Harap isi semua field dengan benar.');
+        return;
+      }
+      if(editMode && editId !== null) {
+        // Update existing
+        const index = transactions.findIndex(t => t.id === editId);
+        if(index !== -1) {
+          transactions[index] = {
+            ...transactions[index],
+            amount: jumlah,
+            date: tanggal,
+            category: kategori,
+            desc: kategori,
+          };
+          alert('Transaksi berhasil diperbarui.');
+        }
+      } else {
+        // Save new
+        transactions.push({
+          id: Date.now(),
+          type: transaksiType,
+          amount: jumlah,
+          date: tanggal,
+          category: kategori,
+          desc: kategori,
+        });
+        alert('Transaksi berhasil disimpan.');
+      }
+      editMode = false;
+      editId = null;
+      resetTransaksiButtons();
+      switchTab('history');
+      renderHistory();
+      inputForm.reset();
+      inputForm.style.display = 'none';
+      transaksiBtnContainer.classList.remove('top-position');
+    });
+
+    // Render history list with edit/delete buttons
+    function renderHistory() {
+      const filter = filterSelect.value;
+      const filterDateVal = filterDate.value;
+      const search = searchCategory.value.trim().toLowerCase();
+
+      historyList.innerHTML = '';
+
+      let filtered = [...transactions];
+
+      if(filter !== 'semua' && filterDateVal) {
+        filtered = filtered.filter(t => {
+          if(filter === 'tanggal') {
+            return t.date === filterDateVal;
+          } else if(filter === 'bulan') {
+            return t.date.slice(0,7) === filterDateVal.slice(0,7);
+          } else if(filter === 'tahun') {
+            return t.date.slice(0,4) === filterDateVal.slice(0,4);
+          }
+          return true;
+        });
+      }
+      if(search) {
+        filtered = filtered.filter(t => (t.category.toLowerCase().indexOf(search) !== -1) || (t.desc.toLowerCase().indexOf(search) !== -1));
+      }
+
+      if(filtered.length === 0) {
+        const emptyDiv = document.createElement('div');
+        emptyDiv.textContent = 'Data tidak ditemukan.';
+        emptyDiv.style.textAlign = 'center';
+        emptyDiv.style.marginTop = '30px';
+        historyList.appendChild(emptyDiv);
+        return;
+      }
+
+      filtered.forEach(t => {
+        const div = document.createElement('div');
+        div.className = 'history-item';
+
+        const leftDiv = document.createElement('div');
+        leftDiv.className = 'history-left';
+
+        const iconSpan = document.createElement('span');
+        iconSpan.className = 'kategori-icon';
+        iconSpan.setAttribute('aria-hidden','true');
+        let iconHTML = kategoriMap[t.category]?.icon ?? kategoriMap.lainnya.icon;
+        iconSpan.innerHTML = iconHTML;
+        iconSpan.classList.add('tag-' + (kategoriMap[t.category] ? t.category : 'lainnya'));
+        iconSpan.style.fill = kategoriMap[t.category]?.color || kategoriMap.lainnya.color;
+
+        const detailDiv = document.createElement('div');
+        detailDiv.className = 'detail';
+        const catP = document.createElement('span');
+        catP.textContent = t.category;
+        const dateP = document.createElement('small');
+        dateP.textContent = t.date;
+
+        detailDiv.appendChild(catP);
+        detailDiv.appendChild(dateP);
+        leftDiv.appendChild(iconSpan);
+        leftDiv.appendChild(detailDiv);
+
+        const amountSpan = document.createElement('span');
+        amountSpan.className = 'amount ' + (t.type === 'pemasukan' ? 'text-green' : 'text-red');
+        amountSpan.textContent = (t.type === 'pengeluaran' ? '- ' : '+ ') + formatCurrency(t.amount);
+
+        // Actions container
+        const actionsDiv = document.createElement('div');
+        actionsDiv.className = 'actions';
+
+        // Edit button
+        const editBtn = document.createElement('button');
+        editBtn.className = 'action-btn edit';
+        editBtn.title = 'Edit transaksi';
+        editBtn.setAttribute('aria-label', 'Edit transaksi ' + t.category + ' tanggal ' + t.date);
+        editBtn.innerHTML = `
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" >
+            <path d="M12 20h9"/>
+            <path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4 12.5-12.5z"/>
+          </svg>
+        `;
+        editBtn.addEventListener('click', () => {
+          editMode = true;
+          editId = t.id;
+          switchTab('transaksi');
+          transaksiBtnContainer.classList.add('top-position');
+          inputForm.style.display = 'flex';
+          transaksiType = t.type;
+          transaksiButtons.forEach(b => {
+            b.style.display = (b.dataset.type === transaksiType) ? 'flex' : 'none';
+            b.classList.toggle('active', b.dataset.type === transaksiType);
+            b.setAttribute('aria-selected', b.dataset.type === transaksiType);
+            b.tabIndex = b.dataset.type === transaksiType ? 0 : -1;
+          });
+          inputForm.jumlah.value = t.amount;
+          inputForm.tanggal.value = t.date;
+          if (kategoriMap[t.category]) {
+            kategoriTagsSetSelection(t.category);
+            kategoriCustom.style.display = 'none';
+            kategoriCustom.value = '';
+          } else {
+            kategoriTagsSetSelection('lainnya');
+            kategoriCustom.style.display = 'block';
+            kategoriCustom.value = t.category;
+          }
+        });
+
+        // Delete button
+        const deleteBtn = document.createElement('button');
+        deleteBtn.className = 'action-btn delete';
+        deleteBtn.title = 'Hapus transaksi';
+        deleteBtn.setAttribute('aria-label', 'Hapus transaksi ' + t.category + ' tanggal ' + t.date);
+        deleteBtn.innerHTML = `
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" >
+            <polyline points="3 6 5 6 21 6"/>
+            <path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/>
+            <path d="M10 11v6"/>
+            <path d="M14 11v6"/>
+            <path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/>
+          </svg>
+        `;
+        deleteBtn.addEventListener('click', () => {
+          if(confirm('Apakah Anda yakin ingin menghapus transaksi ini?')) {
+            transactions = transactions.filter(item => item.id !== t.id);
+            renderHistory();
+          }
+        });
+
+        actionsDiv.appendChild(editBtn);
+        actionsDiv.appendChild(deleteBtn);
+
+        div.appendChild(leftDiv);
+        div.appendChild(amountSpan);
+        div.appendChild(actionsDiv);
+
+        historyList.appendChild(div);
+      });
+    }
+
+    // Kategori tags clickable buttons
+    function kategoriTagsSetSelection(value) {
+      Array.from(kategoriTagsContainer.children).forEach(btn => {
+        const isSelected = btn.dataset.value === value;
+        btn.classList.toggle('selected', isSelected);
+        btn.setAttribute('aria-pressed', isSelected);
+      });
+      if(value === 'lainnya') {
+        kategoriCustom.style.display = 'block';
+        kategoriCustom.focus();
+      } else {
+        kategoriCustom.style.display = 'none';
+      }
+    }
+
+    // Chart.js setup and other logic unchanged...
+
+    // Format currency in IDR
+    function formatCurrency(num) {
+      return 'RP ' + num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+    }
+
+    // Chart.js setup
+    let chart;
+    const dummyChartData = {
+      minggu: {
+        labels: ['Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab', 'Min'],
+        pemasukan: [12000000, 15000000, 13000000, 18000000, 10000000, 12000000, 16000000],
+        pengeluaran: [8000000, 7000000, 9000000, 6000000, 9000000, 7200000, 4900000]
+      },
+      bulan: {
+        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'],
+        pemasukan: [110000000, 160000000, 120000000, 180000000, 150000000, 100000000, 110000000, 115000000, 108000000, 100000000, 95000000, 105000000],
+        pengeluaran: [90000000, 80000000, 78000000, 82000000, 87000000, 88000000, 73000000, 71000000, 66000000, 70000000, 72000000, 69000000]
+      },
+      tahun: {
+        labels: ['2018', '2019', '2020', '2021', '2022', '2023', '2024'],
+        pemasukan: [900000000, 1200000000, 1000000000, 1100000000, 1050000000, 1150000000, 1250000000],
+        pengeluaran: [700000000, 850000000, 900000000, 870000000, 820000000, 900000000, 970000000]
+      }
+    };
+
+    function createChart(labels, pemasukanData, pengeluaranData) {
+      if(chart) chart.destroy();
+      chart = new Chart(chartCanvas, {
+        type: 'line',
+        data: {
+          labels,
+          datasets: [
+            {
+              label: 'Pemasukan',
+              data: pemasukanData,
+              borderColor: '#27ae60',
+              backgroundColor: 'rgba(39, 174, 96, 0.2)',
+              fill: false,
+              tension: 0.3,
+              borderWidth: 3,
+              pointRadius: 4,
+              pointHoverRadius: 6,
+            },
+            {
+              label: 'Pengeluaran',
+              data: pengeluaranData,
+              borderColor: '#eb5757',
+              backgroundColor: 'rgba(235, 87, 87, 0.2)',
+              fill: false,
+              tension: 0.3,
+              borderWidth: 3,
+              pointRadius: 4,
+              pointHoverRadius: 6,
+            },
+          ],
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          animation: {duration: 600, easing: 'easeInOutQuad'},
+          scales: {
+            y: {
+              beginAtZero: true,
+              ticks: {callback: val => 'Rp ' + val.toLocaleString('id-ID')}
+            }
+          },
+          interaction: {mode: 'nearest', intersect: false},
+          plugins: {
+            legend: {labels: {font: {weight: 'bold'}}},
+            tooltip: {callbacks: {label: e => e.dataset.label + ': Rp ' + e.parsed.y.toLocaleString('id-ID')}}
+          }
+        }
+      });
+    }
+
+    function updateChart(timeframe) {
+      const data = dummyChartData[timeframe] || dummyChartData.minggu;
+      createChart(data.labels, data.pemasukan, data.pengeluaran);
+    }
+
+    // Initialize
+    updateChart(activeTimeframe);
+    switchTab(activeTab);
+    renderHistory();
+
+    // Filters and search UI
+    filterSelect.addEventListener('change', () => {
+      if(filterSelect.value === 'semua') {
+        filterDate.disabled = true;
+      } else {
+        filterDate.disabled = false;
+      }
+      renderHistory();
+    });
+    filterDate.addEventListener('change', renderHistory);
+    searchCategory.addEventListener('input', renderHistory);
+
+    // Swipe gesture support
+    let touchStartX = null;
+    let touchCurrentX = null;
+    let isSwiping = false;
+    const minSwipeDistance = 40; 
+
+    const handleSwipeStart = e => {
+      if(e.touches.length === 1) {
+        touchStartX = e.touches[0].clientX;
+        isSwiping = true;
+      }
+    };
+    const handleSwipeMove = e => {
+      if(!isSwiping) return;
+      touchCurrentX = e.touches[0].clientX;
+    };
+    const handleSwipeEnd = e => {
+      if(!isSwiping) return;
+      const deltaX = touchCurrentX - touchStartX;
+      if(Math.abs(deltaX) > minSwipeDistance) {
+        let currentIndex = ['dashboard', 'transaksi', 'history'].indexOf(activeTab);
+        if(deltaX < 0 && currentIndex < 2) currentIndex++;
+        else if(deltaX > 0 && currentIndex > 0) currentIndex--;
+        switchTab(['dashboard', 'transaksi', 'history'][currentIndex]);
+      }
+      isSwiping = false;
+      touchStartX = null;
+      touchCurrentX = null;
+    };
+
+    const contentWrapper = document.getElementById('content-wrapper');
+    contentWrapper.addEventListener('touchstart', handleSwipeStart, {passive:true});
+    contentWrapper.addEventListener('touchmove', handleSwipeMove, {passive:true});
+    contentWrapper.addEventListener('touchend', handleSwipeEnd);
+
+  })();
+</script>
+</body>
+</html>
+
