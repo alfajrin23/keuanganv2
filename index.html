@@ -606,7 +606,6 @@
             display: block;
         }
 
-
         /* Settings Modal */
         .settings-modal {
             position: fixed;
@@ -744,6 +743,7 @@
         .toggle-input:checked + .toggle-slider:before {
             transform: translateX(25px);
         }
+
         /* Login Screen */
         #loginScreen {
             position: fixed;
@@ -832,7 +832,7 @@
     </style>
 </head>
 <body>
-      <!-- Login Screen -->
+    <!-- Login Screen -->
     <div id="loginScreen">
         <div class="login-card">
             <div class="app-logo">💰</div>
@@ -844,6 +844,7 @@
             </button>
         </div>
     </div>
+
     <div class="app-container">
         <div class="content-container">
             <div class="tab-content" id="tabContent">
@@ -851,62 +852,27 @@
                 <div class="tab-pane">
                     <div class="header">
                         <h1>💰 Keuangan</h1>
-                        <button class="settings-modal" id="settingsModal">
-        <div class="settings-content">
-            <div class="settings-header">⚙️</button>
+                        <button class="settings-btn" id="settingsModal">⚙️</button>
                     </div>
-                    
-            </div>
-            <div class="settings-item" id="accountSettingsBtn">
-                <div class="settings-icon account-icon">👤</div>
-                <div>Akun</div>
-            </div>
-            <div class="settings-item">
-                <div class="settings-icon theme-icon">🌙</div>
-                <div>Mode Gelap</div>
-                <label
-                class="toggle-switch">
-                    <input type="checkbox" id="darkModeToggle" class="toggle-input" />
-                    <span class="toggle-slider"></span>
-                </label>
-            </div>
-            <div class="settings-item" id="addWalletBtn">
-                <div class="settings-icon wallet-icon">👛</div>
-                <div>Tambah Dompet</div>
-            </div>
-            <div class="settings-item" id="aboutBtn">
-                <div class="settings-icon about-icon">ℹ️</div>
-                <div>Tentang</div>
-            </div>
-            <div class="settings-item" id="logoutBtn">
-                <div class="settings-icon logout-icon">🚪</div>
-                <div>Keluar</div>
-            </div>
-        </div>
-    </div>
-
-
                     <div class="balance-card fade-in">
                         <div class="balance-label">Saldo Saat Ini</div>
-                        <div class="balance-amount">Rp 100.000.000</div>
+                        <div class="balance-amount" id="balanceAmount">Rp 0</div>
                         <div class="balance-summary">
                             <div class="balance-item">
                                 <div class="balance-item-label">Pemasukan</div>
-                                <div class="balance-item-amount">Rp 100.000.000</div>
+                                <div class="balance-item-amount" id="incomeAmount">Rp 0</div>
                             </div>
                             <div class="balance-item">
                                 <div class="balance-item-label">Pengeluaran</div>
-                                <div class="balance-item-amount">Rp 100.000.000</div>
+                                <div class="balance-item-amount" id="expenseAmount">Rp 0</div>
                             </div>
                         </div>
                     </div>
-
                     <div class="chart-controls">
                         <button class="chart-btn active" data-period="week">Minggu</button>
                         <button class="chart-btn" data-period="month">Bulan</button>
                         <button class="chart-btn" data-period="year">Tahun</button>
                     </div>
-
                     <div class="chart-container">
                         <div class="chart-placeholder">
                             <svg width="100%" height="100%" viewBox="0 0 300 150">
@@ -920,15 +886,12 @@
                                         <stop offset="100%" style="stop-color:#f56565;stop-opacity:0.05" />
                                     </linearGradient>
                                 </defs>
-                                
                                 <!-- Income Line -->
                                 <path class="chart-line income-line" d="M20,120 Q80,80 140,90 Q200,100 280,70" />
                                 <path d="M20,120 Q80,80 140,90 Q200,100 280,70 L280,140 L20,140 Z" fill="url(#incomeGradient)" />
-                                
                                 <!-- Expense Line -->
                                 <path class="chart-line expense-line" d="M20,100 Q80,110 140,85 Q200,75 280,95" />
                                 <path d="M20,100 Q80,110 140,85 Q200,75 280,95 L280,140 L20,140 Z" fill="url(#expenseGradient)" />
-                                
                                 <!-- Legend -->
                                 <g transform="translate(10, 10)">
                                     <circle cx="5" cy="5" r="3" fill="#48bb78"/>
@@ -939,17 +902,16 @@
                             </svg>
                         </div>
                     </div>
-
                     <div class="today-summary">
                         <div class="summary-card">
                             <div class="summary-icon income-icon">📈</div>
                             <div class="summary-label">Pemasukan Hari Ini</div>
-                            <div class="summary-amount income-amount">Rp 9.000.000</div>
+                            <div class="summary-amount income-amount" id="todayIncome">Rp 0</div>
                         </div>
                         <div class="summary-card">
                             <div class="summary-icon expense-icon">📉</div>
                             <div class="summary-label">Pengeluaran Hari Ini</div>
-                            <div class="summary-amount expense-amount">Rp 9.000.000</div>
+                            <div class="summary-amount expense-amount" id="todayExpense">Rp 0</div>
                         </div>
                     </div>
                 </div>
@@ -1030,32 +992,6 @@
 
                     <div class="history-list" id="historyList">
                         <!-- Sample data -->
-                        <div class="history-item">
-                            <div class="history-icon income-icon">💼</div>
-                            <div class="history-details">
-                                <div class="history-category" style="color: #48bb78;">Gaji</div>
-                                <div class="history-date">2 Juni 2025</div>
-                            </div>
-                            <div class="history-amount income-amount">+Rp 5.000.000</div>
-                        </div>
-                        
-                        <div class="history-item">
-                            <div class="history-icon expense-icon">🛒</div>
-                            <div class="history-details">
-                                <div class="history-category" style="color: #f56565;">Belanja</div>
-                                <div class="history-date">1 Juni 2025</div>
-                            </div>
-                            <div class="history-amount expense-amount">-Rp 500.000</div>
-                        </div>
-                        
-                        <div class="history-item">
-                            <div class="history-icon income-icon">🏦</div>
-                            <div class="history-details">
-                                <div class="history-category" style="color: #48bb78;">Tabung</div>
-                                <div class="history-date">31 Mei 2025</div>
-                            </div>
-                            <div class="history-amount income-amount">+Rp 1.000.000</div>
-                        </div>
                     </div>
                 </div>
             </div>
@@ -1075,84 +1011,141 @@
                 <div class="nav-text">History</div>
             </div>
         </nav>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js"></script>
 
     <script>
-        // Global variables
+        // ===== Firebase Config =====
+        const firebaseConfig = {
+            apiKey: "AIzaSyDRqoGxfzUlaiWvKtxhOC9ow1TQMEMPAmg",
+            authDomain: "keuangan-6f443.firebaseapp.com",
+            projectId: "keuangan-6f443",
+            storageBucket: "keuangan-6f443.appspot.com",
+            messagingSenderId: "26113576851",
+            appId: "1:26113576851:web:fd109685d977b5625e6266",
+            measurementId: "G-5PNCPF8TPV"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+
+        // ===== Variables =====
+        let currentUser = null;
+        let transactions = [];
         let currentTab = 0;
         let currentTransactionType = '';
-        let transactions = [
-            { type: 'income', category: 'gaji', amount: 5000000, date: '2025-06-02', icon: '💼' },
-            { type: 'expense', category: 'belanja', amount: 500000, date: '2025-06-01', icon: '🛒' },
-            { type: 'income', category: 'tabung', amount: 1000000, date: '2025-05-31', icon: '🏦' }
-        ];
+        let selectedCategory = null;
 
-        // Tab functionality
+        // ===== Elements =====
+        const loginScreen = document.getElementById('loginScreen');
+        const mainApp = document.getElementById('mainApp');
         const tabContent = document.getElementById('tabContent');
         const navItems = document.querySelectorAll('.nav-item');
+        const googleLoginBtn = document.getElementById('googleLoginBtn');
+        const transactionButtons = document.getElementById('transactionButtons');
+        const transactionForm = document.getElementById('transactionForm');
+        const backBtn = document.getElementById('backBtn');
+        const formTitle = document.getElementById('formTitle');
+        const amountInput = document.getElementById('amountInput');
+        const dateInput = document.getElementById('dateInput');
+        const categoryTagsContainer = document.getElementById('categoryTags');
+        const customCategoryInput = document.getElementById('customCategoryInput');
+        const saveBtn = document.getElementById('saveBtn');
 
+        const historyFilter = document.getElementById('historyFilter');
+        const historyDate = document.getElementById('historyDate');
+        const searchInput = document.getElementById('searchInput');
+        const historyList = document.getElementById('historyList');
+
+        const balanceAmount = document.getElementById('balanceAmount');
+        const incomeAmount = document.getElementById('incomeAmount');
+        const expenseAmount = document.getElementById('expenseAmount');
+        const todayIncome = document.getElementById('todayIncome');
+        const todayExpense = document.getElementById('todayExpense');
+
+        // ===== Utility Functions =====
+        function formatNumber(number) {
+            if (!number) return '0';
+            return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+        }
+
+        function formatCurrency(number) {
+            return 'Rp ' + formatNumber(number);
+        }
+
+        // ===== Login with Google =====
+        googleLoginBtn.addEventListener('click', async () => {
+            const provider = new firebase.auth.GoogleAuthProvider();
+            try {
+                await auth.signInWithPopup(provider);
+            } catch (error) {
+                alert('Gagal login: ' + error.message);
+            }
+        });
+
+        // ===== Logout =====
+        logoutBtn.addEventListener('click', () => {
+            auth.signOut();
+        });
+
+        // ===== Auth State Changed =====
+        auth.onAuthStateChanged(async (user) => {
+            if (user) {
+                currentUser = user;
+                loginScreen.classList.add('hidden');
+                mainApp.style.display = 'flex';
+                await loadTransactions();
+                updateDashboard();
+                switchTab(0);
+            } else {
+                currentUser = null;
+                loginScreen.classList.remove('hidden');
+                mainApp.style.display = 'none';
+                transactions = [];
+            }
+        });
+
+        // Load transactions from Firestore
+        async function loadTransactions() {
+            const snapshot = await db.collection('transactions').where('userId', '==', currentUser.uid).get();
+            transactions = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            updateDashboard();
+            updateHistoryList();
+        }
+
+        // Update dashboard with balance and summary
+        function updateDashboard() {
+            const balance = transactions.reduce((acc, transaction) => {
+                return transaction.type === 'income' ? acc + transaction.amount : acc - transaction.amount;
+            }, 0);
+
+            const income = transactions.filter(t => t.type === 'income').reduce((acc, t) => acc + t.amount, 0);
+            const expense = transactions.filter(t => t.type === 'expense').reduce((acc, t) => acc + t.amount, 0);
+
+            balanceAmount.textContent = formatCurrency(balance);
+            incomeAmount.textContent = formatCurrency(income);
+            expenseAmount.textContent = formatCurrency(expense);
+            todayIncome.textContent = formatCurrency(transactions.filter(t => t.type === 'income' && t.date === new Date().toISOString().split('T')[0]).reduce((acc, t) => acc + t.amount, 0));
+            todayExpense.textContent = formatCurrency(transactions.filter(t => t.type === 'expense' && t.date === new Date().toISOString().split('T')[0]).reduce((acc, t) => acc + t.amount, 0));
+        }
+
+        // Switch between tabs
         function switchTab(tabIndex) {
             currentTab = tabIndex;
             tabContent.style.transform = `translateX(-${tabIndex * 33.333}%)`;
-            
             navItems.forEach((item, index) => {
                 item.classList.toggle('active', index === tabIndex);
             });
         }
 
-        // Navigation click handlers
-        navItems.forEach((item, index) => {
-            item.addEventListener('click', () => {
-                switchTab(index);
-            });
-        });
-
-        // Touch/swipe functionality
-        let startX = 0;
-        let isDragging = false;
-
-        tabContent.addEventListener('touchstart', (e) => {
-            startX = e.touches[0].clientX;
-            isDragging = true;
-        });
-
-        tabContent.addEventListener('touchmove', (e) => {
-            if (!isDragging) return;
-            e.preventDefault();
-        });
-
-        tabContent.addEventListener('touchend', (e) => {
-            if (!isDragging) return;
-            
-            const endX = e.changedTouches[0].clientX;
-            const diffX = startX - endX;
-            
-            if (Math.abs(diffX) > 50) {
-                if (diffX > 0 && currentTab < 2) {
-                    switchTab(currentTab + 1);
-                } else if (diffX < 0 && currentTab > 0) {
-                    switchTab(currentTab - 1);
-                }
-            }
-            
-            isDragging = false;
-        });
-
-        // Chart controls
-        const chartBtns = document.querySelectorAll('.chart-btn');
-        chartBtns.forEach(btn => {
-            btn.addEventListener('click', () => {
-                chartBtns.forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-            });
-        });
-
         // Transaction functionality
-        const transactionButtons = document.getElementById('transactionButtons');
-        const transactionForm = document.getElementById('transactionForm');
-        const formTitle = document.getElementById('formTitle');
-        const backBtn = document.getElementById('backBtn');
         const transactionBtns = document.querySelectorAll('.transaction-btn');
-
         transactionBtns.forEach(btn => {
             btn.addEventListener('click', () => {
                 currentTransactionType = btn.dataset.type;
@@ -1183,31 +1176,29 @@
         }
 
         function updateCategoryTags(type) {
-            const categoryTags = document.getElementById('categoryTags');
             const categories = type === 'income' 
                 ? [
-                    { name: 'gaji', icon: '💼', color: '#4299e1' },
-                    { name: 'bonus', icon: '🎁', color: '#38b2ac' },
-                    { name: 'investasi', icon: '📈', color: '#9f7aea' },
-                    { name: 'usaha', icon: '🏪', color: '#ed8936' },
-                    { name: 'lainnya', icon: '📝', color: '#718096' }
+                    { name: 'gaji', icon: '💼' },
+                    { name: 'bonus', icon: '🎁' },
+                    { name: 'investasi', icon: '📈' },
+                    { name: 'usaha', icon: '🏪' },
+                    { name: 'lainnya', icon: '📝' }
                 ]
                 : [
-                    { name: 'belanja', icon: '🛒', color: '#e53e3e' },
-                    { name: 'makan', icon: '🍽️', color: '#dd6b20' },
-                    { name: 'transport', icon: '🚗', color: '#3182ce' },
-                    { name: 'bayar', icon: '💳', color: '#805ad5' },
-                    { name: 'lainnya', icon: '📝', color: '#718096' }
+                    { name: 'belanja', icon: '🛒' },
+                    { name: 'makan', icon: '🍽️' },
+                    { name: 'transport', icon: '🚗' },
+                    { name: 'bayar', icon: '💳' },
+                    { name: 'lainnya', icon: '📝' }
                 ];
 
-            categoryTags.innerHTML = '';
+            categoryTagsContainer.innerHTML = '';
             categories.forEach(cat => {
                 const tag = document.createElement('div');
                 tag.className = 'category-tag';
                 tag.dataset.category = cat.name;
-                tag.style.setProperty('--category-color', cat.color);
                 tag.innerHTML = `<span>${cat.icon}</span> ${cat.name.charAt(0).toUpperCase() + cat.name.slice(1)}`;
-                categoryTags.appendChild(tag);
+                categoryTagsContainer.appendChild(tag);
             });
         }
 
@@ -1235,17 +1226,7 @@
         });
 
         // Save transaction
-        const saveBtn = document.getElementById('saveBtn');
-        const amountInput = document.getElementById('amountInput');
-        const dateInput = document.getElementById('dateInput');
-        const customCategory = document.getElementById('customCategory');
-
-        // Set today's date as default
-        const today = new Date().toISOString().split('T')[0];
-        dateInput.value = today;
-        document.getElementById('historyDate').value = today;
-
-        saveBtn.addEventListener('click', () => {
+        saveBtn.addEventListener('click', async () => {
             const amount = parseInt(amountInput.value);
             const date = dateInput.value;
             const selectedTag = document.querySelector('.category-tag.selected');
@@ -1258,66 +1239,41 @@
             let category = selectedTag.dataset.category;
             let icon = selectedTag.querySelector('span').textContent;
             
-            if (category === 'lainnya' && customCategory.value) {
-                category = customCategory.value;
+            if (category === 'lainnya' && customCategoryInput.value) {
+                category = customCategoryInput.value;
                 icon = '📝';
             }
             
             const transaction = {
+                userId: currentUser.uid,
                 type: currentTransactionType,
                 category: category,
                 amount: amount,
                 date: date,
                 icon: icon
             };
-            
+
+            // Save to Firestore
+            await db.collection('transactions').add(transaction);
             transactions.unshift(transaction);
+            updateDashboard();
             updateHistoryList();
             
             // Reset form
             amountInput.value = '';
-            customCategory.value = '';
+            customCategoryInput.value = '';
             document.querySelectorAll('.category-tag').forEach(t => t.classList.remove('selected'));
-            document.getElementById('customCategoryInput').classList.remove('active');
+            customCategoryInput.classList.remove('active');
             
             hideTransactionForm();
-            
-            // Show success animation
-            showSuccessMessage('Transaksi berhasil disimpan! ✅');
         });
 
-        function showSuccessMessage(message) {
-            const successDiv = document.createElement('div');
-            successDiv.style.cssText = `
-                position: fixed;
-                top: 50%;
-                left: 50%;
-                transform: translate(-50%, -50%);
-                background: linear-gradient(135deg, #48bb78, #38a169);
-                color: white;
-                padding: 20px 30px;
-                border-radius: 12px;
-                box-shadow: 0 8px 32px rgba(72, 187, 120, 0.3);
-                z-index: 10000;
-                font-weight: 600;
-                animation: successPop 0.5s ease-out;
-            `;
-            successDiv.textContent = message;
-            
-            document.body.appendChild(successDiv);
-            
-            setTimeout(() => {
-                successDiv.remove();
-            }, 2000);
-        }
-
-        // History functionality
+        // Update history list
         function updateHistoryList() {
-            const historyList = document.getElementById('historyList');
-            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
-            const filterType = document.getElementById('historyFilter').value;
-            const filterDate = document.getElementById('historyDate').value;
-            
+            const searchTerm = searchInput.value.toLowerCase();
+            const filterType = historyFilter.value;
+            const filterDate = historyDate.value;
+
             let filteredTransactions = transactions.filter(transaction => {
                 const matchesSearch = transaction.category.toLowerCase().includes(searchTerm);
                 
@@ -1382,126 +1338,13 @@
             });
         }
 
-        // History filters
-        document.getElementById('searchInput').addEventListener('input', updateHistoryList);
-        document.getElementById('historyFilter').addEventListener('change', updateHistoryList);
-        document.getElementById('historyDate').addEventListener('change', updateHistoryList);
+        // Event listeners for history filters
+        searchInput.addEventListener('input', updateHistoryList);
+        historyFilter.addEventListener('change', updateHistoryList);
+        historyDate.addEventListener('change', updateHistoryList);
 
         // Initialize
         updateHistoryList();
-
-        // Add CSS animation for success message
-        const style = document.createElement('style');
-        style.textContent = `
-            @keyframes successPop {
-                0% {
-                    opacity: 0;
-                    transform: translate(-50%, -50%) scale(0.8);
-                }
-                50% {
-                    transform: translate(-50%, -50%) scale(1.05);
-                }
-                100% {
-                    opacity: 1;
-                    transform: translate(-50%, -50%) scale(1);
-                }
-            }
-            
-            .category-tag:hover {
-                background: var(--category-color, #667eea) !important;
-                color: white !important;
-                border-color: var(--category-color, #667eea) !important;
-            }
-            
-            .category-tag.selected {
-                background: var(--category-color, #667eea) !important;
-                color: white !important;
-                border-color: var(--category-color, #667eea) !important;
-            }
-            
-            /* Smooth scrolling for history */
-            .history-list {
-                scroll-behavior: smooth;
-            }
-            
-            .history-list::-webkit-scrollbar {
-                width: 4px;
-            }
-            
-            .history-list::-webkit-scrollbar-track {
-                background: #f1f1f1;
-                border-radius: 2px;
-            }
-            
-            .history-list::-webkit-scrollbar-thumb {
-                background: #c1c1c1;
-                border-radius: 2px;
-            }
-            
-            .history-list::-webkit-scrollbar-thumb:hover {
-                background: #a1a1a1;
-            }
-            
-            /* Mobile responsiveness improvements */
-            @media (max-width: 380px) {
-                .balance-amount {
-                    font-size: 24px;
-                }
-                
-                .balance-item-amount {
-                    font-size: 14px;
-                }
-                
-                .transaction-btn {
-                    max-width: 120px;
-                    padding: 15px;
-                }
-                
-                .category-tags {
-                    gap: 8px;
-                }
-                
-                .category-tag {
-                    padding: 8px 12px;
-                    font-size: 13px;
-                }
-            }
-        `;
-        document.head.appendChild(style);
-
-        // Settings button functionality
-        document.querySelector('.settings-btn').addEventListener('click', () => {
-            alert('⚙️ Fitur pengaturan akan segera hadir!');
-        });
-
-        // Add loading animation for chart
-        setTimeout(() => {
-            document.querySelectorAll('.chart-line').forEach(line => {
-                line.style.animation = 'drawLine 2s ease-out forwards';
-            });
-        }, 500);
-
-        // Keyboard shortcuts
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape' && transactionForm.classList.contains('active')) {
-                hideTransactionForm();
-            }
-        });
-
-        // Auto-focus amount input when form opens
-        const observer = new MutationObserver((mutations) => {
-            mutations.forEach((mutation) => {
-                if (mutation.type === 'attributes' && 
-                    mutation.attributeName === 'class' && 
-                    transactionForm.classList.contains('active')) {
-                    setTimeout(() => {
-                        amountInput.focus();
-                    }, 300);
-                }
-            });
-        });
-        
-        observer.observe(transactionForm, { attributes: true });
     </script>
 </body>
 </html>
