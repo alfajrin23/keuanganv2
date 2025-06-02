@@ -1,1855 +1,1726 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Keuangan App</title>
-
-  <!-- Firebase -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.23.0/firebase-app-compat.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.23.0/firebase-auth-compat.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.23.0/firebase-firestore-compat.min.js"></script>
-
-  <!-- Chart.js -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
-
-  <!-- FontAwesome -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
-
-  <style>
-    /* ======= RESET & BASIC STYLES ======= */
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-
-    body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      max-width: 400px;
-      margin: 0 auto;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: white;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      overflow-x: hidden;
-      transition: background 0.3s ease;
-    }
-
-    body.dark {
-      background: #1f2937;
-      color: #f9fafb;
-    }
-
-    /* ======= CONTAINER ======= */
-    .app-container {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      background: white;
-      border-radius: 20px;
-      margin: 20px 10px;
-      overflow: hidden;
-      box-shadow: 0 25px 50px rgba(0,0,0,0.15);
-      color: #1f2937;
-      position: relative;
-    }
-
-    body.dark .app-container {
-      background: #374151;
-      color: #f9fafb;
-      box-shadow: 0 25px 50px rgba(0,0,0,0.7);
-    }
-
-    /* ======= LOGIN SCREEN ======= */
-    #loginScreen {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: white;
-      position: relative;
-      overflow: hidden;
-    }
-
-    #loginScreen .login-card {
-      background: rgba(255,255,255,0.95);
-      backdrop-filter: blur(10px);
-      padding: 2rem;
-      border-radius: 20px;
-      box-shadow: 0 25px 50px rgba(0,0,0,0.15);
-      text-align: center;
-      width: 90%;
-      max-width: 320px;
-      animation: slideUp 0.8s ease-out;
-      color: #1f2937;
-    }
-
-    #loginScreen .app-logo {
-      width: 80px;
-      height: 80px;
-      background: linear-gradient(135deg, #48bb78, #38a169);
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin: 0 auto 1.5rem;
-      animation: pulse 2s ease-in-out infinite;
-      color: white;
-      font-size: 2rem;
-    }
-
-    #loginScreen .login-title {
-      font-size: 1.8rem;
-      font-weight: bold;
-      margin-bottom: 0.5rem;
-    }
-
-    #loginScreen .login-subtitle {
-      color: #4a5568;
-      margin-bottom: 2rem;
-    }
-
-    #loginScreen .google-login-btn {
-      background: white;
-      color: #1f2937;
-      border: 2px solid #e2e8f0;
-      padding: 1rem 2rem;
-      border-radius: 50px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 0.75rem;
-      cursor: pointer;
-      font-weight: 500;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-      transition: all 0.3s ease;
-    }
-
-    #loginScreen .google-login-btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 25px rgba(0,0,0,0.15);
-      border-color: #667eea;
-    }
-
-    #loginScreen .google-icon {
-      width: 20px;
-      height: 20px;
-      background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="%234285f4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="%2334a853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="%23fbbc05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="%23ea4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>') no-repeat center;
-      background-size: contain;
-    }
-
-    /* ======= MAIN APP ======= */
-    #mainApp {
-      display: none;
-      flex-direction: column;
-      height: 100vh;
-      color: #1f2937;
-      background: white;
-      border-radius: 20px;
-      overflow: hidden;
-      box-shadow: 0 25px 50px rgba(0,0,0,0.15);
-    }
-
-    body.dark #mainApp {
-      background: #374151;
-      color: #f9fafb;
-      box-shadow: 0 25px 50px rgba(0,0,0,0.7);
-    }
-
-    #mainApp.active {
-      display: flex;
-    }
-
-    /* ======= HEADER ======= */
-    .header {
-      padding: 1rem;
-      background: white;
-      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      color: #667eea;
-      position: relative;
-      z-index: 10;
-    }
-
-    body.dark .header {
-      background: #374151;
-      color: #8b5cf6;
-      box-shadow: 0 4px 6px rgba(0,0,0,0.7);
-    }
-
-    .header-title {
-      font-size: 1.5rem;
-      font-weight: bold;
-    }
-
-    .settings-btn {
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      background: #667eea;
-      color: white;
-      border: none;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      font-size: 1.2rem;
-    }
-
-    .settings-btn:hover {
-      transform: rotate(90deg);
-      background: #764ba2;
-    }
-
-    /* ======= TAB CONTAINER ======= */
-    .tab-container {
-      flex: 1;
-      overflow: hidden;
-      position: relative;
-    }
-
-    .tab-content {
-      display: flex;
-      width: 300%;
-      height: 100%;
-      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-
-    .tab-pane {
-      width: 33.333%;
-      padding: 1rem;
-      overflow-y: auto;
-      height: calc(100vh - 120px);
-      color: inherit;
-    }
-
-    /* ======= DASHBOARD ======= */
-    .balance-card {
-      background: linear-gradient(135deg, #667eea, #764ba2);
-      padding: 2rem;
-      border-radius: 20px;
-      text-align: center;
-      margin-bottom: 1.5rem;
-      position: relative;
-      overflow: hidden;
-      color: white;
-    }
-
-    .balance-card::before {
-      content: '';
-      position: absolute;
-      top: -50%;
-      right: -50%;
-      width: 100%;
-      height: 200%;
-      background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1), transparent);
-      transform: rotate(45deg);
-      animation: shimmer 3s ease-in-out infinite;
-    }
-
-    @keyframes shimmer {
-      0%, 100% { transform: translateX(-100%) rotate(45deg); }
-      50% { transform: translateX(100%) rotate(45deg); }
-    }
-
-    .balance-label {
-      color: rgba(255, 255, 255, 0.8);
-      font-size: 0.9rem;
-      margin-bottom: 0.5rem;
-    }
-
-    .balance-amount {
-      color: white;
-      font-size: 2rem;
-      font-weight: bold;
-    }
-
-    .income-expense-row {
-      display: flex;
-      gap: 1rem;
-      margin-bottom: 2rem;
-    }
-
-    .income-expense-card {
-      flex: 1;
-      padding: 1.5rem;
-      border-radius: 15px;
-      text-align: center;
-      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-      color: white;
-    }
-
-    .income-card {
-      background: linear-gradient(135deg, #48bb78, #38a169);
-    }
-
-    .expense-card {
-      background: linear-gradient(135deg, #f56565, #e53e3e);
-    }
-
-    .income-expense-card .label {
-      color: rgba(255, 255, 255, 0.8);
-      font-size: 0.85rem;
-      margin-bottom: 0.5rem;
-    }
-
-    .income-expense-card .amount {
-      font-size: 1.2rem;
-      font-weight: bold;
-    }
-
-    /* ======= CHART CONTROLS ======= */
-    .chart-controls {
-      display: flex;
-      justify-content: center;
-      gap: 0.5rem;
-      margin-bottom: 1.5rem;
-    }
-
-    .chart-btn {
-      padding: 0.5rem 1rem;
-      border: 2px solid #e2e8f0;
-      background: white;
-      border-radius: 25px;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      font-size: 0.85rem;
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      color: #667eea;
-      user-select: none;
-    }
-
-    body.dark .chart-btn {
-      background: #374151;
-      border-color: #4b5563;
-      color: #8b5cf6;
-    }
-
-    .chart-btn.active {
-      background: #667eea;
-      color: white;
-      border-color: #667eea;
-      transform: scale(1.05);
-    }
-
-    /* ======= CHART CONTAINER ======= */
-    .chart-container {
-      background: white;
-      padding: 1rem;
-      border-radius: 15px;
-      margin-bottom: 1.5rem;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-      height: 250px;
-      color: #1f2937;
-    }
-
-    body.dark .chart-container {
-      background: #374151;
-      color: #f9fafb;
-    }
-
-    /* ======= TODAY STATS ======= */
-    .today-stats {
-      display: flex;
-      gap: 1rem;
-    }
-
-    .today-stat {
-      flex: 1;
-      padding: 1rem;
-      border-radius: 15px;
-      text-align: center;
-      color: inherit;
-    }
-
-    .today-income {
-      background: linear-gradient(135deg, rgba(72, 187, 120, 0.1), rgba(38, 150, 105, 0.1));
-      border: 2px solid #48bb78;
-      color: #48bb78;
-    }
-
-    .today-expense {
-      background: linear-gradient(135deg, rgba(245, 101, 101, 0.1), rgba(229, 62, 62, 0.1));
-      border: 2px solid #f56565;
-      color: #f56565;
-    }
-
-    .today-stat .label {
-      font-size: 0.85rem;
-      margin-bottom: 0.5rem;
-      opacity: 0.8;
-    }
-
-    .today-stat .amount {
-      font-size: 1.1rem;
-      font-weight: bold;
-    }
-
-    /* ======= TRANSACTION TAB ======= */
-    .transaction-buttons {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100%;
-      gap: 2rem;
-      margin-bottom: 1rem;
-    }
-
-    .transaction-btn {
-      width: 120px;
-      height: 120px;
-      border-radius: 50%;
-      border: none;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      font-size: 0.9rem;
-      font-weight: bold;
-      gap: 0.5rem;
-      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
-      color: white;
-    }
-
-    .income-btn {
-      background: linear-gradient(135deg, #48bb78, #38a169);
-    }
-
-    .expense-btn {
-      background: linear-gradient(135deg, #f56565, #e53e3e);
-    }
-
-    .transaction-btn:hover {
-      transform: translateY(-5px) scale(1.05);
-    }
-
-    .transaction-btn i {
-      font-size: 2rem;
-    }
-
-    /* ======= TRANSACTION FORM ======= */
-    .transaction-form {
-      display: none;
-      padding: 2rem 1rem;
-      color: inherit;
-    }
-
-    .transaction-form.active {
-      display: block;
-      animation: slideInUp 0.3s ease-out;
-    }
-
-    @keyframes slideInUp {
-      from {
-        opacity: 0;
-        transform: translateY(30px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-
-    .form-header {
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-      margin-bottom: 2rem;
-      padding-bottom: 1rem;
-      border-bottom: 2px solid #e2e8f0;
-    }
-
-    body.dark .form-header {
-      border-color: #4b5563;
-    }
-
-    .back-btn {
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      background: white;
-      border: 2px solid #e2e8f0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      color: #667eea;
-      font-size: 1.2rem;
-    }
-
-    body.dark .back-btn {
-      background: #374151;
-      border-color: #4b5563;
-      color: #8b5cf6;
-    }
-
-    .back-btn:hover {
-      transform: rotate(-180deg);
-      background: #667eea;
-      color: white;
-    }
-
-    .form-title {
-      font-size: 1.5rem;
-      font-weight: bold;
-      color: inherit;
-    }
-
-    .form-group {
-      margin-bottom: 1.5rem;
-    }
-
-    .form-label {
-      display: block;
-      margin-bottom: 0.5rem;
-      font-weight: 500;
-      color: inherit;
-    }
-
-    .form-input {
-      width: 100%;
-      padding: 1rem;
-      border: 2px solid #e2e8f0;
-      border-radius: 10px;
-      font-size: 1rem;
-      transition: all 0.3s ease;
-      background: white;
-      color: #1f2937;
-    }
-
-    body.dark .form-input {
-      background: #374151;
-      border-color: #4b5563;
-      color: #f9fafb;
-    }
-
-    .form-input:focus {
-      outline: none;
-      border-color: #667eea;
-      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-    }
-
-    /* Category Tags */
-    .category-tags {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.5rem;
-    }
-
-    .category-tag {
-      padding: 0.5rem 1rem;
-      border-radius: 25px;
-      border: 2px solid #e2e8f0;
-      background: white;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      font-size: 0.85rem;
-      user-select: none;
-      color: #1f2937;
-    }
-
-    body.dark .category-tag {
-      background: #374151;
-      border-color: #4b5563;
-      color: #f9fafb;
-    }
-
-    .category-tag.active {
-      border-color: #667eea;
-      background: #667eea;
-      color: white;
-      transform: scale(1.05);
-    }
-
-    .category-tag.gaji { border-color: #10b981; }
-    .category-tag.gaji.active { background: #10b981; }
-    .category-tag.belanja { border-color: #f59e0b; }
-    .category-tag.belanja.active { background: #f59e0b; }
-    .category-tag.bayar { border-color: #ef4444; }
-    .category-tag.bayar.active { background: #ef4444; }
-    .category-tag.tabung { border-color: #8b5cf6; }
-    .category-tag.tabung.active { background: #8b5cf6; }
-    .category-tag.lainnya { border-color: #6b7280; }
-    .category-tag.lainnya.active { background: #6b7280; }
-
-    .save-btn {
-      width: 100%;
-      padding: 1rem;
-      background: linear-gradient(135deg, #667eea, #764ba2);
-      color: white;
-      border: none;
-      border-radius: 10px;
-      font-size: 1.1rem;
-      font-weight: bold;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 0.5rem;
-    }
-
-    .save-btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
-    }
-
-    /* ======= HISTORY TAB ======= */
-    .history-filters {
-      background: white;
-      padding: 1rem;
-      border-radius: 15px;
-      margin-bottom: 1.5rem;
-      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-      color: #1f2937;
-    }
-
-    body.dark .history-filters {
-      background: #374151;
-      color: #f9fafb;
-      box-shadow: 0 4px 6px rgba(0,0,0,0.7);
-    }
-
-    .filter-row {
-      display: flex;
-      gap: 1rem;
-      margin-bottom: 1rem;
-    }
-
-    .filter-select {
-      flex: 1;
-      padding: 0.75rem;
-      border: 2px solid #e2e8f0;
-      border-radius: 8px;
-      background: white;
-      color: #1f2937;
-    }
-
-    body.dark .filter-select {
-      background: #374151;
-      border-color: #4b5563;
-      color: #f9fafb;
-    }
-
-    .search-input {
-      width: 100%;
-      padding: 0.75rem;
-      border: 2px solid #e2e8f0;
-      border-radius: 8px;
-      background: white;
-      color: #1f2937;
-    }
-
-    body.dark .search-input {
-      background: #374151;
-      border-color: #4b5563;
-      color: #f9fafb;
-    }
-
-    .history-list {
-      max-height: 350px;
-      overflow-y: auto;
-    }
-
-    .history-item {
-      background: white;
-      padding: 1rem;
-      border-radius: 15px;
-      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 1rem;
-      transition: all 0.3s ease;
-      color: #1f2937;
-    }
-
-    body.dark .history-item {
-      background: #374151;
-      color: #f9fafb;
-      box-shadow: 0 4px 6px rgba(0,0,0,0.7);
-    }
-
-    .history-item:hover {
-      transform: translateX(5px);
-    }
-
-    .history-left {
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-    }
-
-    .category-icon {
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: white;
-      font-size: 1.2rem;
-    }
-
-    .history-info h4 {
-      margin-bottom: 0.25rem;
-    }
-
-    .history-info p {
-      font-size: 0.85rem;
-      opacity: 0.7;
-    }
-
-    .history-amount {
-      font-weight: bold;
-      font-size: 1.1rem;
-    }
-
-    .income-amount {
-      color: #10b981;
-    }
-
-    .expense-amount {
-      color: #ef4444;
-    }
-
-    .history-actions {
-      display: flex;
-      gap: 0.5rem;
-    }
-
-    .action-btn {
-      width: 30px;
-      height: 30px;
-      border-radius: 50%;
-      border: none;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      color: white;
-    }
-
-    .edit-btn {
-      background: #f59e0b;
-    }
-
-    .delete-btn {
-      background: #ef4444;
-    }
-
-    .action-btn:hover {
-      transform: scale(1.1);
-    }
-
-    /* ======= BOTTOM NAVIGATION ======= */
-    .bottom-nav {
-      background: white;
-      padding: 0.75rem;
-      display: flex;
-      justify-content: space-around;
-      box-shadow: 0 -4px 6px -1px rgba(0,0,0,0.1);
-      position: relative;
-      z-index: 10;
-      color: #667eea;
-      border-top-left-radius: 20px;
-      border-top-right-radius: 20px;
-    }
-
-    body.dark .bottom-nav {
-      background: #374151;
-      color: #8b5cf6;
-      box-shadow: 0 -4px 6px -1px rgba(0,0,0,0.7);
-    }
-
-    .nav-item {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 0.25rem;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      padding: 0.5rem;
-      border-radius: 10px;
-      position: relative;
-      color: inherit;
-      user-select: none;
-    }
-
-    .nav-item.active {
-      color: #667eea;
-      transform: translateY(-2px);
-      font-weight: bold;
-    }
-
-    body.dark .nav-item.active {
-      color: #8b5cf6;
-    }
-
-    .nav-item i {
-      font-size: 1.25rem;
-      transition: all 0.3s ease;
-    }
-
-    .nav-item.active i {
-      animation: bounce 0.6s ease;
-    }
-
-    @keyframes bounce {
-      0%, 20%, 60%, 100% { transform: translateY(0); }
-      40% { transform: translateY(-10px); }
-      80% { transform: translateY(-5px); }
-    }
-
-    .nav-label {
-      font-size: 0.7rem;
-      font-weight: 500;
-    }
-
-    /* ======= SETTINGS MODAL ======= */
-    .settings-modal {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
-      background: rgba(0,0,0,0.5);
-      display: none;
-      align-items: center;
-      justify-content: center;
-      z-index: 1000;
-      color: #1f2937;
-    }
-
-    .settings-modal.active {
-      display: flex;
-      animation: fadeIn 0.3s ease;
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; }
-      to { opacity: 1; }
-    }
-
-    .settings-content {
-      background: white;
-      width: 90%;
-      max-width: 350px;
-      border-radius: 20px;
-      padding: 1.5rem;
-      max-height: 90vh;
-      overflow-y: auto;
-      animation: slideInDown 0.3s ease;
-      color: #1f2937;
-    }
-
-    body.dark .settings-content {
-      background: #374151;
-      color: #f9fafb;
-    }
-
-    @keyframes slideInDown {
-      from {
-        opacity: 0;
-        transform: translateY(-50px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-
-    .settings-header {
-      text-align: center;
-      margin-bottom: 1.5rem;
-      padding-bottom: 1rem;
-      border-bottom: 2px solid #e2e8f0;
-    }
-
-    body.dark .settings-header {
-      border-color: #4b5563;
-    }
-
-    .settings-item {
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-      padding: 1rem;
-      border-radius: 10px;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      margin-bottom: 0.5rem;
-      color: inherit;
-      user-select: none;
-    }
-
-    .settings-item:hover {
-      background: rgba(102, 126, 234, 0.1);
-      transform: translateX(5px);
-    }
-
-    .settings-icon {
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.2rem;
-      color: white;
-    }
-
-    .account-icon { background: #667eea; }
-    .theme-icon { background: #f59e0b; }
-    .about-icon { background: #10b981; }
-    .wallet-icon { background: #8b5cf6; }
-    .logout-icon { background: #ef4444; }
-
-    /* Toggle Switch */
-    .toggle-switch {
-      position: relative;
-      width: 50px;
-      height: 25px;
-      margin-left: auto;
-    }
-
-    .toggle-input {
-      opacity: 0;
-      width: 0;
-      height: 0;
-    }
-
-    .toggle-slider {
-      position: absolute;
-      cursor: pointer;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background-color: #ccc;
-      transition: 0.3s;
-      border-radius: 25px;
-    }
-
-    .toggle-slider:before {
-      position: absolute;
-      content: "";
-      height: 19px;
-      width: 19px;
-      left: 3px;
-      bottom: 3px;
-      background-color: white;
-      transition: 0.3s;
-      border-radius: 50%;
-    }
-
-    .toggle-input:checked + .toggle-slider {
-      background-color: #667eea;
-    }
-
-    .toggle-input:checked + .toggle-slider:before {
-      transform: translateX(25px);
-    }
-
-    /* Animations */
-    @keyframes slideUp {
-      from {
-        opacity: 0;
-        transform: translateY(50px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-
-    @keyframes pulse {
-      0%, 100% { transform: scale(1); }
-      50% { transform: scale(1.05); }
-    }
-
-    @keyframes successPop {
-      0% {
-        opacity: 0;
-        transform: translate(-50%, -50%) scale(0.8);
-      }
-      50% {
-        transform: translate(-50%, -50%) scale(1.05);
-      }
-      100% {
-        opacity: 1;
-        transform: translate(-50%, -50%) scale(1);
-      }
-    }
-
-    /* Success message style */
-    .success-message {
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      background: linear-gradient(135deg, #48bb78, #38a169);
-      color: white;
-      padding: 20px 30px;
-      border-radius: 12px;
-      box-shadow: 0 8px 32px rgba(72, 187, 120, 0.3);
-      z-index: 10000;
-      font-weight: 600;
-      animation: successPop 0.5s ease-out;
-    }
-
-  </style>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Keuangan App</title>
+
+    <!-- Firebase -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.23.0/firebase-app-compat.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.23.0/firebase-auth-compat.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.23.0/firebase-firestore-compat.min.js"></script>
+
+    <style>
+        /* ========== STYLE DARI INDEX.HTML ========== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            overflow-x: hidden;
+            height: 100vh;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        body.dark {
+            background: #1f2937;
+            color: #f9fafb;
+        }
+
+        .app-container {
+            max-width: 400px;
+            margin: 0 auto;
+            height: 100vh;
+            background: #fff;
+            position: relative;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+        }
+
+        body.dark .app-container {
+            background: #374151;
+            color: #f9fafb;
+            box-shadow: 0 0 20px rgba(0,0,0,0.7);
+        }
+
+        .content-container {
+            height: calc(100vh - 80px);
+            overflow: hidden;
+            position: relative;
+            flex-grow: 1;
+        }
+
+        .tab-content {
+            width: 300%;
+            height: 100%;
+            display: flex;
+            transition: transform 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
+            will-change: transform;
+        }
+
+        .tab-pane {
+            width: 33.333%;
+            flex-shrink: 0;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        /* Header Styles */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding: 10px 0;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            font-weight: 700;
+            color: #2d3748;
+        }
+
+        body.dark .header h1 {
+            color: #f9fafb;
+        }
+
+        .settings-btn {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            border: none;
+            border-radius: 12px;
+            padding: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(79, 172, 254, 0.3);
+            font-size: 18px;
+            color: white;
+            user-select: none;
+        }
+
+        .settings-btn:hover {
+            transform: translateY(-2px) rotate(90deg);
+            box-shadow: 0 6px 20px rgba(79, 172, 254, 0.6);
+        }
+
+        /* Balance Card */
+        .balance-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 20px;
+            padding: 25px;
+            text-align: center;
+            margin-bottom: 20px;
+            box-shadow: 0 8px 32px rgba(102, 126, 234, 0.3);
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .balance-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 100%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1), transparent);
+            transform: rotate(45deg);
+            animation: shimmer 3s ease-in-out infinite;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        @keyframes shimmer {
+            0%, 100% { transform: translateX(-100%) rotate(45deg); }
+            50% { transform: translateX(100%) rotate(45deg); }
+        }
+
+        .balance-label {
+            font-size: 16px;
+            opacity: 0.8;
+            margin-bottom: 8px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .balance-amount {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .balance-summary {
+            display: flex;
+            justify-content: space-between;
+            gap: 15px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .balance-item {
+            flex: 1;
+            background: rgba(255,255,255,0.2);
+            border-radius: 12px;
+            padding: 15px;
+            backdrop-filter: blur(10px);
+            color: white;
+            text-align: center;
+        }
+
+        .balance-item-label {
+            font-size: 12px;
+            opacity: 0.8;
+            margin-bottom: 5px;
+        }
+
+        .balance-item-amount {
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        /* Chart Controls */
+        .chart-controls {
+            display: flex;
+            background: #f7fafc;
+            border-radius: 12px;
+            padding: 4px;
+            margin: 20px 0;
+            position: relative;
+        }
+
+        body.dark .chart-controls {
+            background: #4b5563;
+        }
+
+        .chart-btn {
+            flex: 1;
+            background: none;
+            border: none;
+            padding: 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            position: relative;
+            z-index: 2;
+            color: #4a5568;
+            font-size: 14px;
+            user-select: none;
+        }
+
+        body.dark .chart-btn {
+            color: #d1d5db;
+        }
+
+        .chart-btn.active {
+            background: #667eea;
+            color: white;
+            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+        }
+
+        /* Chart Container */
+        .chart-container {
+            background: white;
+            border-radius: 16px;
+            padding: 20px;
+            margin: 20px 0;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            height: 200px;
+            position: relative;
+        }
+
+        body.dark .chart-container {
+            background: #4b5563;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+        }
+
+        /* Today Summary */
+        .today-summary {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .summary-card {
+            flex: 1;
+            background: white;
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            text-align: center;
+            color: #2d3748;
+        }
+
+        body.dark .summary-card {
+            background: #374151;
+            color: #f9fafb;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+        }
+
+        .summary-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 10px;
+            font-size: 20px;
+        }
+
+        .income-icon {
+            background: linear-gradient(135deg, #48bb78, #38a169);
+            color: white;
+        }
+
+        .expense-icon {
+            background: linear-gradient(135deg, #f56565, #e53e3e);
+            color: white;
+        }
+
+        .summary-label {
+            font-size: 14px;
+            color: #718096;
+            margin-bottom: 5px;
+        }
+
+        body.dark .summary-label {
+            color: #a0aec0;
+        }
+
+        .summary-amount {
+            font-size: 18px;
+            font-weight: 700;
+        }
+
+        .income-amount {
+            color: #48bb78;
+        }
+
+        .expense-amount {
+            color: #f56565;
+        }
+
+        /* Transaction Tab */
+        .transaction-buttons {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin-top: 50px;
+        }
+
+        .transaction-btn {
+            flex: 1;
+            max-width: 140px;
+            padding: 20px;
+            border: none;
+            border-radius: 20px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            user-select: none;
+        }
+
+        .income-btn {
+            background: linear-gradient(135deg, #48bb78, #38a169);
+            color: white;
+        }
+
+        .expense-btn {
+            background: linear-gradient(135deg, #f56565, #e53e3e);
+            color: white;
+        }
+
+        .transaction-btn:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 35px rgba(0,0,0,0.2);
+        }
+
+        .transaction-btn:active {
+            transform: translateY(-2px);
+        }
+
+        .transaction-icon {
+            font-size: 24px;
+            transition: transform 0.3s ease;
+        }
+
+        .transaction-btn:hover .transaction-icon {
+            transform: scale(1.2);
+        }
+
+        /* Transaction Form */
+        .transaction-form {
+            display: none;
+            animation: slideUp 0.3s ease-out;
+        }
+
+        .transaction-form.active {
+            display: block;
+        }
+
+        .form-title {
+            text-align: center;
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 30px;
+            color: #2d3748;
+        }
+
+        body.dark .form-title {
+            color: #f9fafb;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #4a5568;
+        }
+
+        body.dark .form-label {
+            color: #a0aec0;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            background: white;
+            color: #2d3748;
+        }
+
+        body.dark .form-input {
+            background: #4b5563;
+            border-color: #718096;
+            color: #f9fafb;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        /* Category Tags */
+        .category-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .category-tag {
+            padding: 10px 15px;
+            border: 2px solid #e2e8f0;
+            border-radius: 20px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            user-select: none;
+        }
+
+        body.dark .category-tag {
+            background: #4b5563;
+            border-color: #718096;
+            color: #f9fafb;
+        }
+
+        .category-tag:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .category-tag.selected {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        .save-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 20px;
+            user-select: none;
+        }
+
+        .save-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+        }
+
+        /* History Tab */
+        .history-filters {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            align-items: center;
+        }
+
+        .filter-select {
+            padding: 10px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            background: white;
+            user-select: none;
+        }
+
+        body.dark .filter-select {
+            background: #4b5563;
+            border-color: #718096;
+            color: #f9fafb;
+        }
+
+        .date-input {
+            padding: 10px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            flex: 1;
+            user-select: none;
+        }
+
+        body.dark .date-input {
+            background: #4b5563;
+            border-color: #718096;
+            color: #f9fafb;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            font-size: 16px;
+        }
+
+        body.dark .search-input {
+            background: #4b5563;
+            border-color: #718096;
+            color: #f9fafb;
+        }
+
+        .history-list {
+            max-height: 400px;
+            overflow-y: auto;
+            scroll-behavior: smooth;
+        }
+
+        .history-list::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .history-list::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 3px;
+        }
+
+        .history-list::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 3px;
+        }
+
+        .history-list::-webkit-scrollbar-thumb:hover {
+            background: #a1a1a1;
+        }
+
+        .history-item {
+            background: white;
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            transition: background-color 0.3s ease;
+        }
+
+        body.dark .history-item {
+            background: #4b5563;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.5);
+        }
+
+        .history-item:hover {
+            background-color: #e2e8f0;
+        }
+
+        body.dark .history-item:hover {
+            background-color: #5a677d;
+        }
+
+        .history-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            user-select: none;
+        }
+
+        .history-details {
+            flex: 1;
+        }
+
+        .history-category {
+            font-weight: 600;
+            margin-bottom: 2px;
+        }
+
+        .history-date {
+            font-size: 12px;
+            color: #718096;
+        }
+
+        body.dark .history-date {
+            color: #a0aec0;
+        }
+
+        .history-amount {
+            font-size: 16px;
+            font-weight: 700;
+            user-select: none;
+        }
+
+        /* Bottom Navigation */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100%;
+            max-width: 400px;
+            background: white;
+            padding: 15px 0;
+            box-shadow: 0 -4px 20px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-around;
+            z-index: 1000;
+        }
+
+        body.dark .bottom-nav {
+            background: #374151;
+            box-shadow: 0 -4px 20px rgba(0,0,0,0.7);
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            cursor: pointer;
+            padding: 5px 15px;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            user-select: none;
+            color: #4a5568;
+        }
+
+        body.dark .nav-item {
+            color: #cbd5e0;
+        }
+
+        .nav-item:hover {
+            background: #f7fafc;
+            transform: translateY(-2px);
+        }
+
+        body.dark .nav-item:hover {
+            background: #4b5563;
+        }
+
+        .nav-item.active {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+
+        .nav-icon {
+            font-size: 24px;
+            margin-bottom: 4px;
+            transition: transform 0.3s ease;
+        }
+
+        .nav-item:hover .nav-icon {
+            transform: scale(1.1);
+        }
+
+        .nav-item.active .nav-icon {
+            animation: bounce 0.6s ease;
+        }
+
+        .nav-text {
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        /* Animations */
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% {
+                transform: translateY(0);
+            }
+            40% {
+                transform: translateY(-8px);
+            }
+            60% {
+                transform: translateY(-4px);
+            }
+        }
+
+        @keyframes fadeIn {
+            from { 
+                opacity: 0; 
+                transform: translateY(20px); 
+            }
+            to { 
+                opacity: 1; 
+                transform: translateY(0); 
+            }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        /* Settings Modal */
+        .settings-modal {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+        }
+
+        .settings-modal.active {
+            display: flex;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .settings-content {
+            background: white;
+            width: 90%;
+            max-width: 350px;
+            border-radius: 20px;
+            padding: 1.5rem;
+            animation: slideInDown 0.3s ease;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            color: #2d3748;
+        }
+
+        body.dark .settings-content {
+            background: #374151;
+            color: #f9fafb;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.7);
+        }
+
+        @keyframes slideInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .settings-header {
+            text-align: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid #e2e8f0;
+        }
+
+        body.dark .settings-header {
+            border-color: #718096;
+        }
+
+        .settings-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 0.5rem;
+            user-select: none;
+        }
+
+        .settings-item:hover {
+            background: rgba(102, 126, 234, 0.1);
+            transform: translateX(5px);
+        }
+
+        body.dark .settings-item:hover {
+            background: rgba(102, 126, 234, 0.3);
+        }
+
+        .settings-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            color: white;
+        }
+
+        .account-icon { background: #667eea; }
+        .theme-icon { background: #f59e0b; }
+        .about-icon { background: #10b981; }
+        .wallet-icon { background: #764ba2; }
+        .logout-icon { background: #ef4444; }
+
+        /* Toggle Switch */
+        .toggle-switch {
+            position: relative;
+            width: 50px;
+            height: 25px;
+            margin-left: auto;
+        }
+
+        .toggle-input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: #ccc;
+            transition: 0.3s;
+            border-radius: 25px;
+        }
+
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 19px;
+            width: 19px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: 0.3s;
+            border-radius: 50%;
+        }
+
+        .toggle-input:checked + .toggle-slider {
+            background-color: #667eea;
+        }
+
+        .toggle-input:checked + .toggle-slider:before {
+            transform: translateX(25px);
+        }
+
+        /* Login Screen */
+        #loginScreen {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            z-index: 3000;
+            user-select: none;
+        }
+
+        #loginScreen.hidden {
+            display: none;
+        }
+
+        .login-card {
+            background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(10px);
+            padding: 2rem;
+            border-radius: 20px;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.15);
+            text-align: center;
+            width: 90%;
+            max-width: 320px;
+            animation: slideUp 0.8s ease-out;
+        }
+
+        .app-logo {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #48bb78, #38a169);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.5rem;
+            font-size: 40px;
+            color: white;
+            user-select: none;
+        }
+
+        .login-title {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #2d3748;
+            margin-bottom: 0.5rem;
+        }
+
+        .login-subtitle {
+            color: #718096;
+            margin-bottom: 2rem;
+            user-select: none;
+        }
+
+        .google-login-btn {
+            background: white;
+            color: #2d3748;
+            border: 2px solid #e2e8f0;
+            padding: 1rem 2rem;
+            border-radius: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            user-select: none;
+        }
+
+        .google-login-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+            border-color: #667eea;
+        }
+
+        .google-icon {
+            width: 20px;
+            height: 20px;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="%234285f4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="%2334a853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="%23fbbc05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="%23ea4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>') no-repeat center;
+            background-size: contain;
+        }
+    </style>
 </head>
 <body>
-  <!-- LOGIN SCREEN -->
-  <div id="loginScreen">
-    <div class="login-card">
-      <div class="app-logo"><i class="fas fa-wallet"></i></div>
-      <h1 class="login-title">Keuangan</h1>
-      <p class="login-subtitle">Kelola keuangan Anda dengan mudah</p>
-      <button class="google-login-btn" id="googleLoginBtn">
-        <div class="google-icon"></div>
-        Masuk dengan Google
-      </button>
-    </div>
-  </div>
-
-  <!-- MAIN APP -->
-  <div id="mainApp" class="app-container">
-    <div class="header">
-      <h1 class="header-title">Keuangan</h1>
-      <button class="settings-btn" id="openSettingsBtn">
-        <i class="fas fa-cog"></i>
-      </button>
-    </div>
-
-    <div class="tab-container">
-      <div class="tab-content" id="tabContent">
-        <!-- Dashboard Tab -->
-        <div class="tab-pane" id="dashboardTab">
-          <div class="balance-card">
-            <div class="balance-label">Total Saldo</div>
-            <div class="balance-amount" id="totalBalance">Rp 0</div>
-          </div>
-
-          <div class="income-expense-row">
-            <div class="income-expense-card income-card">
-              <div class="label">
-                <i class="fas fa-arrow-up"></i> Pemasukan
-              </div>
-              <div class="amount" id="totalIncome">Rp 0</div>
-            </div>
-            <div class="income-expense-card expense-card">
-              <div class="label">
-                <i class="fas fa-arrow-down"></i> Pengeluaran
-              </div>
-              <div class="amount" id="totalExpense">Rp 0</div>
-            </div>
-          </div>
-
-          <div class="chart-controls">
-            <button class="chart-btn active" data-period="week">
-              <i class="fas fa-calendar-week"></i> Minggu
+    <!-- Login Screen -->
+    <div id="loginScreen">
+        <div class="login-card">
+            <div class="app-logo">💰</div>
+            <h1 class="login-title">Keuangan</h1>
+            <p class="login-subtitle">Kelola keuangan Anda dengan mudah</p>
+            <button class="google-login-btn" id="googleLoginBtn">
+                <div class="google-icon"></div>
+                Masuk dengan Google
             </button>
-            <button class="chart-btn" data-period="month">
-              <i class="fas fa-calendar-alt"></i> Bulan
-            </button>
-            <button class="chart-btn" data-period="year">
-              <i class="fas fa-calendar"></i> Tahun
-            </button>
-          </div>
-
-          <div class="chart-container">
-            <canvas id="financeChart"></canvas>
-          </div>
-
-          <div class="today-stats">
-            <div class="today-stat today-income">
-              <div class="label">
-                <i class="fas fa-arrow-up"></i> Hari Ini
-              </div>
-              <div class="amount" id="todayIncome">Rp 0</div>
-            </div>
-            <div class="today-stat today-expense">
-              <div class="label">
-                <i class="fas fa-arrow-down"></i> Hari Ini
-              </div>
-              <div class="amount" id="todayExpense">Rp 0</div>
-            </div>
-          </div>
         </div>
+    </div>
 
-        <!-- Transaction Tab -->
-        <div class="tab-pane" id="transactionTab">
-          <div class="transaction-buttons" id="transactionButtons">
-            <button class="transaction-btn income-btn" id="incomeBtn">
-              <i class="fas fa-plus"></i>
-              <span>Pemasukan</span>
-            </button>
-            <button
-            <button class="transaction-btn expense-btn" id="expenseBtn">
-              <i class="fas fa-minus"></i>
-              <span>Pengeluaran</span>
-            </button>
-          </div>
+    <!-- Main App -->
+    <div class="app-container" style="display:none;" id="mainApp">
+        <div class="content-container">
+            <div class="tab-content" id="tabContent" style="transform: translateX(0);">
+                <!-- Dashboard Tab -->
+                <div class="tab-pane">
+                    <div class="header">
+                        <h1>💰 Keuangan</h1>
+                        <button class="settings-btn" id="settingsBtn">⚙️</button>
+                    </div>
+                    
+                    <div class="balance-card fade-in">
+                        <div class="balance-label">Saldo Saat Ini</div>
+                        <div class="balance-amount" id="balanceAmount">Rp 0</div>
+                        <div class="balance-summary">
+                            <div class="balance-item">
+                                <div class="balance-item-label">Pemasukan</div>
+                                <div class="balance-item-amount" id="incomeAmount">Rp 0</div>
+                            </div>
+                            <div class="balance-item">
+                                <div class="balance-item-label">Pengeluaran</div>
+                                <div class="balance-item-amount" id="expenseAmount">Rp 0</div>
+                            </div>
+                        </div>
+                    </div>
 
-          <div class="transaction-form" id="transactionForm">
-            <div class="form-header">
-              <button class="back-btn" id="backBtn"><i class="fas fa-arrow-left"></i></button>
-              <h2 class="form-title" id="formTitle">Tambah Pemasukan</h2>
-            </div>
+                    <div class="chart-controls">
+                        <button class="chart-btn active" data-period="week">Minggu</button>
+                        <button class="chart-btn" data-period="month">Bulan</button>
+                        <button class="chart-btn" data-period="year">Tahun</button>
+                    </div>
 
-            <form id="transactionFormElement">
-              <div class="form-group">
-                <label class="form-label" for="amountInput">Jumlah (Rp)</label>
-                <input type="text" class="form-input" id="amountInput" placeholder="0" autocomplete="off" />
-              </div>
+                    <div class="chart-container" id="chartContainer">
+                        <canvas id="financeChart" width="300" height="150"></canvas>
+                    </div>
 
-              <div class="form-group">
-                <label class="form-label" for="dateInput">Tanggal</label>
-                <input type="date" class="form-input" id="dateInput" />
-              </div>
-
-              <div class="form-group">
-                <label class="form-label">Kategori</label>
-                <div class="category-tags" id="categoryTags">
-                  <div class="category-tag gaji" data-category="gaji"><i class="fas fa-money-bill-wave"></i> Gaji</div>
-                  <div class="category-tag belanja" data-category="belanja"><i class="fas fa-shopping-cart"></i> Belanja</div>
-                  <div class="category-tag bayar" data-category="bayar"><i class="fas fa-file-invoice-dollar"></i> Bayar</div>
-                  <div class="category-tag tabung" data-category="tabung"><i class="fas fa-piggy-bank"></i> Tabung</div>
-                  <div class="category-tag lainnya" data-category="lainnya"><i class="fas fa-ellipsis-h"></i> Lainnya</div>
+                    <div class="today-summary">
+                        <div class="summary-card">
+                            <div class="summary-icon income-icon">📈</div>
+                            <div class="summary-label">Pemasukan Hari Ini</div>
+                            <div class="summary-amount income-amount" id="todayIncome">Rp 0</div>
+                        </div>
+                        <div class="summary-card">
+                            <div class="summary-icon expense-icon">📉</div>
+                            <div class="summary-label">Pengeluaran Hari Ini</div>
+                            <div class="summary-amount expense-amount" id="todayExpense">Rp 0</div>
+                        </div>
+                    </div>
                 </div>
-              </div>
 
-              <div class="form-group hidden" id="customCategoryGroup">
-                <label class="form-label" for="customCategoryInput">Kategori Lainnya</label>
-                <input type="text" class="form-input" id="customCategoryInput" placeholder="Masukkan kategori" autocomplete="off" />
-              </div>
+                <!-- Transaction Tab -->
+                <div class="tab-pane">
+                    <div class="transaction-buttons" id="transactionButtons">
+                        <button class="transaction-btn income-btn" data-type="income">
+                            <div class="transaction-icon">💰</div>
+                            <span>Pemasukan</span>
+                        </button>
+                        <button class="transaction-btn expense-btn" data-type="expense">
+                            <div class="transaction-icon">💸</div>
+                            <span>Pengeluaran</span>
+                        </button>
+                    </div>
 
-              <button type="submit" class="save-btn"><i class="fas fa-save"></i> Simpan</button>
-            </form>
-          </div>
+                    <div class="transaction-form" id="transactionForm">
+                        <div class="header">
+                            <button class="back-btn" id="backBtn">←</button>
+                            <h2 class="form-title" id="formTitle">Tambah Pemasukan</h2>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Jumlah (Rp)</label>
+                            <input type="text" class="form-input" placeholder="0" id="amountInput" autocomplete="off" />
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Tanggal</label>
+                            <input type="date" class="form-input" id="dateInput" />
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Kategori</label>
+                            <div class="category-tags" id="categoryTags">
+                                <!-- Kategori akan di-generate lewat JS -->
+                            </div>
+                        </div>
+
+                        <div class="form-group" id="customCategoryGroup" style="display:none;">
+                            <input type="text" class="form-input" placeholder="Masukkan kategori custom" id="customCategoryInput" autocomplete="off" />
+                        </div>
+
+                        <button class="save-btn" id="saveBtn">💾 Simpan Transaksi</button>
+                    </div>
+                </div>
+
+                <!-- History Tab -->
+                <div class="tab-pane">
+                    <div class="header">
+                        <h1>📊 Riwayat</h1>
+                        <div class="history-filters">
+                            <select class="filter-select" id="historyFilter">
+                                <option value="all">Semua</option>
+                                <option value="date">Tanggal</option>
+                                <option value="month">Bulan</option>
+                                <option value="year">Tahun</option>
+                            </select>
+                            <input type="date" class="date-input" id="historyDate" />
+                        </div>
+                    </div>
+
+                    <input type="text" class="search-input" placeholder="🔍 Cari berdasarkan kategori..." id="searchInput" />
+
+                    <div class="history-list" id="historyList">
+                        <!-- Daftar transaksi -->
+                    </div>
+                </div>
+            </div>
         </div>
 
-        <!-- History Tab -->
-        <div class="tab-pane" id="historyTab">
-          <div class="history-filters">
-            <div class="filter-row">
-              <select id="filterType" class="filter-select">
-                <option value="all">Semua Jenis</option>
-                <option value="income">Pemasukan</option>
-                <option value="expense">Pengeluaran</option>
-              </select>
-              <select id="filterCategory" class="filter-select">
-                <option value="all">Semua Kategori</option>
-                <option value="gaji">Gaji</option>
-                <option value="belanja">Belanja</option>
-                <option value="bayar">Bayar</option>
-                <option value="tabung">Tabung</option>
-                <option value="lainnya">Lainnya</option>
-              </select>
+        <nav class="bottom-nav">
+            <div class="nav-item active" data-tab="0">
+                <div class="nav-icon">🏠</div>
+                <div class="nav-text">Dashboard</div>
             </div>
-            <input type="text" id="searchInput" class="search-input" placeholder="Cari transaksi..." />
-          </div>
-          <div class="history-list" id="historyList"></div>
+            <div class="nav-item" data-tab="1">
+                <div class="nav-icon">➕</div>
+                <div class="nav-text">Transaksi</div>
+            </div>
+            <div class="nav-item" data-tab="2">
+                <div class="nav-icon">📋</div>
+                <div class="nav-text">Riwayat</div>
+            </div>
+        </nav>
+    </div>
+
+    <!-- Settings Modal -->
+    <div class="settings-modal" id="settingsModal">
+        <div class="settings-content">
+            <div class="settings-header">
+                <h2>Pengaturan</h2>
+            </div>
+            <div class="settings-item" id="accountSettingsBtn">
+                <div class="settings-icon account-icon">👤</div>
+                <div>Akun</div>
+            </div>
+            <div class="settings-item">
+                <div class="settings-icon theme-icon">🌙</div>
+                <div>Mode Gelap</div>
+                <label
+                class="toggle-switch">
+                    <input type="checkbox" id="darkModeToggle" class="toggle-input" />
+                    <span class="toggle-slider"></span>
+                </label>
+            </div>
+            <div class="settings-item" id="addWalletBtn">
+                <div class="settings-icon wallet-icon">👛</div>
+                <div>Tambah Dompet</div>
+            </div>
+            <div class="settings-item" id="aboutBtn">
+                <div class="settings-icon about-icon">ℹ️</div>
+                <div>Tentang</div>
+            </div>
+            <div class="settings-item" id="logoutBtn">
+                <div class="settings-icon logout-icon">🚪</div>
+                <div>Keluar</div>
+            </div>
         </div>
-      </div>
     </div>
 
-    <!-- Bottom Navigation -->
-    <nav class="bottom-nav">
-      <div class="nav-item active" data-tab="dashboardTab">
-        <i class="fas fa-chart-pie"></i>
-        <span class="nav-label">Dashboard</span>
-      </div>
-      <div class="nav-item" data-tab="transactionTab">
-        <i class="fas fa-plus-circle"></i>
-        <span class="nav-label">Transaksi</span>
-      </div>
-      <div class="nav-item" data-tab="historyTab">
-        <i class="fas fa-history"></i>
-        <span class="nav-label">Riwayat</span>
-      </div>
-    </nav>
-  </div>
-
-  <!-- Settings Modal -->
-  <div class="settings-modal" id="settingsModal">
-    <div class="settings-content">
-      <div class="settings-header">
-        <h2>Pengaturan</h2>
-      </div>
-      <div class="settings-item" id="accountSettingsBtn">
-        <div class="settings-icon account-icon"><i class="fas fa-user"></i></div>
-        <div>Akun</div>
-      </div>
-      <div class="settings-item">
-        <div class="settings-icon theme-icon"><i class="fas fa-moon"></i></div>
-        <div>Mode Gelap</div>
-        <label class="toggle-switch">
-          <input type="checkbox" id="darkModeToggle" class="toggle-input" />
-          <span class="toggle-slider"></span>
-        </label>
-      </div>
-      <div class="settings-item" id="addWalletBtn">
-        <div class="settings-icon wallet-icon"><i class="fas fa-wallet"></i></div>
-        <div>Tambah Dompet</div>
-      </div>
-      <div class="settings-item" id="aboutBtn">
-        <div class="settings-icon about-icon"><i class="fas fa-info-circle"></i></div>
-        <div>Tentang</div>
-      </div>
-      <div class="settings-item" id="logoutBtn">
-        <div class="settings-icon logout-icon"><i class="fas fa-sign-out-alt"></i></div>
-        <div>Keluar</div>
-      </div>
-    </div>
-  </div>
-
-  <script>
-    // ======= Firebase Config =======
-    const firebaseConfig = {
-      apiKey: "AIzaSyDRqoGxfzUlaiWvKtxhOC9ow1TQMEMPAmg",
-      authDomain: "keuangan-6f443.firebaseapp.com",
-      projectId: "keuangan-6f443",
-      storageBucket: "keuangan-6f443.appspot.com",
-      messagingSenderId: "26113576851",
-      appId: "1:26113576851:web:fd109685d977b5625e6266",
-      measurementId: "G-5PNCPF8TPV"
-    };
-
-    firebase.initializeApp(firebaseConfig);
-    const auth = firebase.auth();
-    const db = firebase.firestore();
-
-    // ======= Variables =======
-    let currentUser = null;
-    let transactions = [];
-    let selectedCategory = null;
-    let financeChart = null;
-    let currentTab = 'dashboardTab';
-
-    // ======= Format Number =======
-    function formatNumber(number) {
-      if (number === undefined || number === null) return '0';
-      return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-    }
-
-    function formatCurrency(number) {
-      return 'Rp ' + formatNumber(number);
-    }
-
-    // ======= Show/Hide Login and Main App =======
-    function showLoginScreen() {
-      document.getElementById('loginScreen').style.display = 'flex';
-      document.getElementById('mainApp').classList.remove('active');
-    }
-
-    function showMainApp() {
-      document.getElementById('loginScreen').style.display = 'none';
-      document.getElementById('mainApp').classList.add('active');
-    }
-
-    // ======= Login Google =======
-    document.getElementById('googleLoginBtn').addEventListener('click', async () => {
-      const provider = new firebase.auth.GoogleAuthProvider();
-      try {
-        await auth.signInWithPopup(provider);
-      } catch (error) {
-        alert('Gagal login: ' + error.message);
-      }
-    });
-
-    // ======= Logout =======
-    document.getElementById('logoutBtn').addEventListener('click', () => {
-      auth.signOut();
-      closeSettings();
-    });
-
-    // ======= Auth State Changed =======
-    auth.onAuthStateChanged(user => {
-      if (user) {
-        currentUser = user;
-        showMainApp();
-        loadTransactions();
-      } else {
-        currentUser = null;
-        showLoginScreen();
-      }
-    });
-
-    // ======= Load Transactions =======
-    async function loadTransactions() {
-      if (!currentUser) return;
-      try {
-        const snapshot = await db.collection('transactions')
-          .where('userId', '==', currentUser.uid)
-          .orderBy('date', 'desc')
-          .get();
-        transactions = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        updateDashboard();
-        filterAndRenderHistory();
-      } catch (error) {
-        console.error('Gagal memuat transaksi:', error);
-      }
-    }
-
-    // ======= Update Dashboard =======
-    function updateDashboard() {
-      let totalIncome = 0;
-      let totalExpense = 0;
-
-      transactions.forEach(t => {
-        if (t.type === 'income') totalIncome += t.amount;
-        else if (t.type === 'expense') totalExpense += t.amount;
-      });
-
-      const balance = totalIncome - totalExpense;
-
-      document.getElementById('totalIncome').textContent = formatCurrency(totalIncome);
-      document.getElementById('totalExpense').textContent = formatCurrency(totalExpense);
-      document.getElementById('totalBalance').textContent = formatCurrency(balance);
-
-      const todayStr = new Date().toISOString().slice(0,10);
-      const todayIncome = transactions.filter(t => t.type === 'income' && t.date === todayStr).reduce((sum, t) => sum + t.amount, 0);
-      const todayExpense = transactions.filter(t => t.type === 'expense' && t.date === todayStr).reduce((sum, t) => sum + t.amount, 0);
-
-      document.getElementById('todayIncome').textContent = formatCurrency(todayIncome);
-      document.getElementById('todayExpense').textContent = formatCurrency(todayExpense);
-
-      // Update chart data for active period
-      const activeBtn = document.querySelector('.chart-btn.active');
-      if (activeBtn) updateChartData(activeBtn.getAttribute('data-period'));
-    }
-
-    // ======= Initialize Chart =======
-    const ctx = document.getElementById('financeChart').getContext('2d');
-    financeChart = new Chart(ctx, {
-      type: 'line',
-      data: {
-        labels: [],
-        datasets: [
-          {
-            label: 'Pemasukan',
-            data: [],
-            borderColor: '#10b981',
-            backgroundColor: 'rgba(16, 185, 129, 0.2)',
-            fill: true,
-            tension: 0.3,
-            pointRadius: 3,
-          },
-          {
-            label: 'Pengeluaran',
-            data: [],
-            borderColor: '#ef4444',
-            backgroundColor: 'rgba(239, 68, 68, 0.2)',
-            fill: true,
-            tension: 0.3,
-            pointRadius: 3,
-          }
-        ]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        scales: {
-          y: {
-            beginAtZero: true,
-            ticks: {
-              callback: value => formatCurrency(value)
-            }
-          }
-        },
-        plugins: {
-          legend: {
-            labels: {
-              color: getComputedStyle(document.body).color
-            }
-          }
-        }
-      }
-    });
-
-    // ======= Update Chart Data =======
-    function updateChartData(period) {
-      document.querySelectorAll('.chart-btn').forEach(btn => {
-        btn.classList.toggle('active', btn.getAttribute('data-period') === period);
-      });
-
-      let labels = [];
-      let incomeData = [];
-      let expenseData = [];
-      const now = new Date();
-
-      if (period === 'week') {
-        for (let i = 6; i >= 0; i--) {
-          const day = new Date(now);
-          day.setDate(now.getDate() - i);
-          const dayStr = day.toISOString().slice(0,10);
-          labels.push(day.toLocaleDateString('id-ID', { weekday: 'short' }));
-
-          incomeData.push(transactions.filter(t => t.type === 'income' && t.date === dayStr).reduce((sum, t) => sum + t.amount, 0));
-          expenseData.push(transactions.filter(t => t.type === 'expense' && t.date === dayStr).reduce((sum, t) => sum + t.amount, 0));
-        }
-      } else if (period === 'month') {
-        const year = now.getFullYear();
-        const month = now.getMonth();
-        const daysInMonth = new Date(year, month + 1, 0).getDate();
-
-        for (let d = 1; d <= daysInMonth; d++) {
-          const day = new Date(year, month, d);
-          const dayStr = day.toISOString().slice(0,10);
-          labels.push(d.toString());
-
-          incomeData.push(transactions.filter(t => t.type === 'income' && t.date === dayStr).reduce((sum, t) => sum + t.amount, 0));
-          expenseData.push(transactions.filter(t => t.type === 'expense' && t.date === dayStr).reduce((sum, t) => sum + t.amount, 0));
-        }
-      } else if (period === 'year') {
-        const year = now.getFullYear();
-        const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
-
-        for (let m = 0; m < 12; m++) {
-          labels.push(monthNames[m]);
-
-          const monthStr = `${year}-${String(m+1).padStart(2,'0')}`;
-          incomeData.push(transactions.filter(t => t.type === 'income' && t.date.startsWith(monthStr)).reduce((sum, t) => sum + t.amount,0));
-          expenseData.push(transactions.filter(t => t.type === 'expense' && t.date.startsWith(monthStr)).reduce((sum, t) => sum + t.amount,0));
-        }
-      }
-
-      financeChart.data.labels = labels;
-      financeChart.data.datasets[0].data = incomeData;
-      financeChart.data.datasets[1].data = expenseData;
-      financeChart.update();
-    }
-
-    // ======= Tab switching =======
-    const navItems = document.querySelectorAll('.nav-item');
-    const tabContent = document.getElementById('tabContent');
-
-    navItems.forEach(item => {
-      item.addEventListener('click', () => {
-        const tabId = item.dataset.tab;
-        if (tabId === currentTab) return;
-
-        navItems.forEach(i => i.classList.remove('active'));
-        item.classList.add('active');
-
-        let index = 0;
-        if (tabId === 'dashboardTab') index = 0;
-        else if (tabId === 'transactionTab') index = 1;
-        else if (tabId === 'historyTab') index = 2;
-
-        tabContent.style.transform = `translateX(-${index * 100}%)`;
-        currentTab = tabId;
-
-        if (tabId === 'historyTab') filterAndRenderHistory();
-      });
-    });
-
-    // ======= Transaction Form Handling =======
-    const incomeBtn = document.getElementById('incomeBtn');
-    const expenseBtn = document.getElementById('expenseBtn');
-    const transactionButtons = document.getElementById('transactionButtons');
-    const transactionForm = document.getElementById('transactionForm');
-    const backBtn = document.getElementById('backBtn');
-    const formTitle = document.getElementById('formTitle');
-    const transactionFormElement = document.getElementById('transactionFormElement');
-    const amountInput = document.getElementById('amountInput');
-    const dateInput = document.getElementById('dateInput');
-    const categoryTags = document.querySelectorAll('.category-tag');
-    const customCategoryGroup = document.getElementById('customCategoryGroup');
-    const customCategoryInput = document.getElementById('customCategoryInput');
-
-    let currentTransactionType = 'income';
-
-    function resetCategorySelection() {
-      categoryTags.forEach(tag => tag.classList.remove('active'));
-      selectedCategory = null;
-      customCategoryGroup.classList.add('hidden');
-      customCategoryInput.value = '';
-    }
-
-    function selectCategory(category) {
-      selectedCategory = category;
-      categoryTags.forEach(tag => {
-        if (tag.dataset.category === category) tag.classList.add('active');
-        else tag.classList.remove('active');
-      });
-      if (category === 'lainnya') {
-        customCategoryGroup.classList.remove('hidden');
-      } else {
-        customCategoryGroup.classList.add('hidden');
-        customCategoryInput.value = '';
-      }
-    }
-
-    categoryTags.forEach(tag => {
-      tag.addEventListener('click', () => {
-        selectCategory(tag.dataset.category);
-      });
-    });
-
-    function showTransactionForm(type) {
-      currentTransactionType = type;
-      formTitle.textContent = type === 'income' ? 'Tambah Pemasukan' : 'Tambah Pengeluaran';
-      formTitle.style.color = type === 'income' ? '#48bb78' : '#f56565';
-      transactionButtons.style.display = 'none';
-      transactionForm.classList.add('active');
-      transactionFormElement.reset();
-      resetCategorySelection();
-      // Set default date today
-      dateInput.value = new Date().toISOString().slice(0,10);
-      amountInput.focus();
-    }
-
-    function hideTransactionForm() {
-      transactionButtons.style.display = 'flex';
-      transactionForm.classList.remove('active');
-    }
-
-    incomeBtn.addEventListener('click', () => showTransactionForm('income'));
-    expenseBtn.addEventListener('click', () => showTransactionForm('expense'));
-    backBtn.addEventListener('click', hideTransactionForm);
-
-    // Format amount input
-    amountInput.addEventListener('input', () => {
-      let val = amountInput.value.replace(/\D/g, '');
-      if (val === '') {
-        amountInput.value = '';
-        return;
-      }
-      amountInput.value = formatNumber(parseInt(val));
-    });
-
-    // Submit transaction form
-    transactionFormElement.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const amountVal = amountInput.value.replace(/\D/g, '');
-      const dateVal = dateInput.value;
-      const customCatVal = customCategoryInput.value.trim();
-
-      if (!amountVal || !dateVal || !selectedCategory) {
-        alert('Harap lengkapi semua field.');
-        return;
-      }
-
-      const amount = parseInt(amountVal);
-      if (amount <= 0) {
-        alert('Jumlah harus lebih dari 0.');
-        return;
-      }
-
-      const category = (selectedCategory === 'lainnya' && customCatVal) ? customCatVal : selectedCategory;
-
-      const newTransaction = {
-        userId: currentUser.uid,
-        type: currentTransactionType,
-        amount: amount,
-        category: category,
-        date: dateVal,
-        timestamp: new Date()
-      };
-
-      try {
-        await db.collection('transactions').add(newTransaction);
-        showSuccessMessage('Transaksi berhasil ditambahkan!');
-        hideTransactionForm();
-        loadTransactions();
-        switchToTab('dashboardTab');
-      } catch (error) {
-        console.error('Gagal menambahkan transaksi:', error);
-        alert('Gagal menambahkan transaksi.');
-      }
-    });
-
-    // ======= Filter and Render History =======
-    const filterType = document.getElementById('filterType');
-    const filterCategory = document.getElementById('filterCategory');
-    const searchInput = document.getElementById('searchInput');
-    const historyList = document.getElementById('historyList');
-
-    filterType.addEventListener('change', filterAndRenderHistory);
-    filterCategory.addEventListener('change', filterAndRenderHistory);
-    searchInput.addEventListener('input', filterAndRenderHistory);
-
-    function filterAndRenderHistory() {
-      let filtered = [...transactions];
-      const typeVal = filterType.value;
-      const categoryVal = filterCategory.value;
-      const searchVal = searchInput.value.toLowerCase();
-
-      if (typeVal !== 'all') filtered = filtered.filter(t => t.type === typeVal);
-      if (categoryVal !== 'all') filtered = filtered.filter(t => t.category.toLowerCase() === categoryVal);
-      if (searchVal) {
-        filtered = filtered.filter(t => 
-          (t.category && t.category.toLowerCase().includes(searchVal)) ||
-          (t.type && t.type.toLowerCase().includes(searchVal)) ||
-          (t.date && t.date.includes(searchVal))
-        );
-      }
-
-      renderHistory(filtered);
-    }
-
-    function renderHistory(list) {
-      historyList.innerHTML = '';
-      if (list.length === 0) {
-        historyList.innerHTML = '<p class="text-center">Tidak ada transaksi.</p>';
-        return;
-      }
-
-      list.forEach(t => {
-        const item = document.createElement('div');
-        item.className = 'history-item';
-
-        const categoryLower = t.category ? t.category.toLowerCase() : '';
-        let iconClass = 'fas fa-question';
-        let bgColor = '#6b7280';
-
-        switch (categoryLower) {
-          case 'gaji': iconClass = 'fas fa-money-bill-wave'; bgColor = '#10b981'; break;
-          case 'belanja': iconClass = 'fas fa-shopping-cart'; bgColor = '#f59e0b'; break;
-          case 'bayar': iconClass = 'fas fa-file-invoice-dollar'; bgColor = '#ef4444'; break;
-          case 'tabung': iconClass = 'fas fa-piggy-bank'; bgColor = '#8b5cf6'; break;
-          case 'lainnya': iconClass = 'fas fa-ellipsis-h'; bgColor = '#6b7280'; break;
-        }
-
-        const formattedDate = new Date(t.date).toLocaleDateString('id-ID', {
-          day: 'numeric', month: 'long', year: 'numeric'
-        });
-
-        item.innerHTML = `
-          <div class="history-left">
-            <div class="category-icon" style="background-color: ${bgColor};">
-              <i class="${iconClass}"></i>
-            </div>
-            <div class="history-info">
-              <h4>${t.category || 'Lainnya'}</h4>
-              <p>${formattedDate}</p>
-            </div>
-          </div>
-          <div class="history-right">
-            <div class="history-amount ${t.type === 'income' ? 'income-amount' : 'expense-amount'}">
-              ${formatCurrency(t.amount)}
-            </div>
-            <div class="history-actions">
-              <button class="action-btn edit-btn" title="Edit" onclick="editTransaction('${t.id}')">
-                <i class="fas fa-edit"></i>
-              </button>
-              <button class="action-btn delete-btn" title="Hapus" onclick="deleteTransaction('${t.id}')">
-                <i class="fas fa-trash"></i>
-              </button>
-            </div>
-          </div>
-        `;
-
-        historyList.appendChild(item);
-      });
-    }
-
-    // ======= Edit Transaction =======
-    async function editTransaction(id) {
-      const transaction = transactions.find(t => t.id === id);
-      if (!transaction) {
-        alert('Transaksi tidak ditemukan.');
-        return;
-      }
-
-      showTransactionForm(transaction.type);
-      amountInput.value = formatNumber(transaction.amount);
-      dateInput.value = transaction.date;
-
-      if (['gaji', 'belanja', 'bayar', 'tabung'].includes(transaction.category.toLowerCase())) {
-        selectCategory(transaction.category.toLowerCase());
-      } else {
-        selectCategory('lainnya');
-        customCategoryInput.value = transaction.category;
-      }
-
-      transactionFormElement.onsubmit = async (e) => {
-        e.preventDefault();
-        const amountVal = amountInput.value.replace(/\D/g, '');
-        const dateVal = dateInput.value;
-        const customCatVal = customCategoryInput.value.trim();
-
-        if (!amountVal || !dateVal || !selectedCategory) {
-          alert('Harap lengkapi semua field.');
-          return;
-        }
-
-        const amount = parseInt(amountVal);
-        if (amount <= 0) {
-          alert('Jumlah harus lebih dari 0.');
-          return;
-        }
-
-        const category = (selectedCategory === 'lainnya' && customCatVal) ? customCatVal : selectedCategory;
-
-        const updatedTransaction = {
-          type: transaction.type,
-          amount: amount,
-          category: category,
-          date: dateVal,
-          timestamp: new Date(),
-          userId: currentUser.uid
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script>
+        // ===== Firebase Config =====
+        const firebaseConfig = {
+            apiKey: "AIzaSyDRqoGxfzUlaiWvKtxhOC9ow1TQMEMPAmg",
+            authDomain: "keuangan-6f443.firebaseapp.com",
+            projectId: "keuangan-6f443",
+            storageBucket: "keuangan-6f443.appspot.com",
+            messagingSenderId: "26113576851",
+            appId: "1:26113576851:web:fd109685d977b5625e6266",
+            measurementId: "G-5PNCPF8TPV"
         };
 
-        try {
-          await db.collection('transactions').doc(id).update(updatedTransaction);
-          alert('Transaksi berhasil diperbarui!');
-          hideTransactionForm();
-          loadTransactions();
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
 
-          // Reset form submit to add
-          transactionFormElement.onsubmit = addTransactionHandler;
-          switchToTab('dashboardTab');
-        } catch (error) {
-          console.error('Gagal memperbarui transaksi:', error);
-          alert('Gagal memperbarui transaksi.');
+        // ===== Variables =====
+        let currentUser = null;
+        let transactions = [];
+        let currentTab = 0;
+        let currentTransactionType = '';
+        let selectedCategory = null;
+        let financeChart = null;
+
+        // ===== Elements =====
+        const loginScreen = document.getElementById('loginScreen');
+        const mainApp = document.getElementById('mainApp');
+        const tabContent = document.getElementById('tabContent');
+        const navItems = document.querySelectorAll('.nav-item');
+        const googleLoginBtn = document.getElementById('googleLoginBtn');
+        const settingsBtn = document.getElementById('settingsBtn');
+        const settingsModal = document.getElementById('settingsModal');
+        const darkModeToggle = document.getElementById('darkModeToggle');
+        const accountSettingsBtn = document.getElementById('accountSettingsBtn');
+        const addWalletBtn = document.getElementById('addWalletBtn');
+        const aboutBtn = document.getElementById('aboutBtn');
+        const logoutBtn = document.getElementById('logoutBtn');
+
+        const transactionButtons = document.getElementById('transactionButtons');
+        const transactionForm = document.getElementById('transactionForm');
+        const backBtn = document.getElementById('backBtn');
+        const formTitle = document.getElementById('formTitle');
+        const amountInput = document.getElementById('amountInput');
+        const dateInput = document.getElementById('dateInput');
+        const categoryTagsContainer = document.getElementById('categoryTags');
+        const customCategoryGroup = document.getElementById('customCategoryGroup');
+        const customCategoryInput = document.getElementById('customCategoryInput');
+        const saveBtn = document.getElementById('saveBtn');
+
+        const historyFilter = document.getElementById('historyFilter');
+        const historyDate = document.getElementById('historyDate');
+        const searchInput = document.getElementById('searchInput');
+        const historyList = document.getElementById('historyList');
+
+        const balanceAmount = document.getElementById('balanceAmount');
+        const incomeAmount = document.getElementById('incomeAmount');
+        const expenseAmount = document.getElementById('expenseAmount');
+        const todayIncome = document.getElementById('todayIncome');
+        const todayExpense = document.getElementById('todayExpense');
+
+        // ===== Utility Functions =====
+        function formatNumber(number) {
+            if (!number) return '0';
+            return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
         }
-      };
-    }
 
-    // ======= Delete Transaction =======
-    async function deleteTransaction(id) {
-      if (!confirm('Apakah Anda yakin ingin menghapus transaksi ini?')) return;
+        function formatCurrency(number) {
+            return 'Rp ' + formatNumber(number);
+        }
 
-      try {
-        await db.collection('transactions').doc(id).delete();
-        alert('Transaksi berhasil dihapus.');
-        loadTransactions();
-      } catch (error) {
-        console.error('Gagal menghapus transaksi:', error);
-        alert('Gagal menghapus transaksi.');
-      }
-    }
+        // ===== Login with Google =====
+        googleLoginBtn.addEventListener('click', async () => {
+            const provider = new firebase.auth.GoogleAuthProvider();
+            try {
+                await auth.signInWithPopup(provider);
+            } catch (error) {
+                alert('Gagal login: ' + error.message);
+            }
+        });
 
-    // ======= Show Success Message =======
-    function showSuccessMessage(message) {
-      const successDiv = document.createElement('div');
-      successDiv.classList.add('success-message');
-      successDiv.textContent = message;
-      document.body.appendChild(successDiv);
-      setTimeout(() => successDiv.remove(), 2000);
-    }
+        // ===== Logout =====
+        logoutBtn.addEventListener('click', () => {
+            auth.signOut();
+        });
 
-    // ======= Switch Tab Programmatically =======
-    function switchToTab(tabId) {
-      const targetNav = [...navItems].find(i => i.dataset.tab === tabId);
-      if (targetNav) targetNav.click();
-    }
+        // ===== Auth State Changed =====
+        auth.onAuthStateChanged(async (user) => {
+            if (user) {
+                currentUser = user;
+                loginScreen.classList.add('hidden');
+                mainApp.style.display = 'flex';
+                await loadTransactions();
+                updateDashboard();
+                switchTab(0);
+                loadThemePreference();
+            } else {
+                currentUser = null;
+                loginScreen.classList.remove('hidden');
+                mainApp.style.display = 'none';
+                transactions = [];
+            }
+        });
 
-    // ======= Add Transaction Handler for normal add =======
-    async function addTransactionHandler(e) {
-      e.preventDefault();
-      const amountVal = amountInput.value.replace(/\D/g, '');
-      const dateVal = dateInput.value;
-      const customCatVal = customCategoryInput.value.trim();
+        // ===== Switch Tab =====
+        function switchTab(index) {
+            if (index === currentTab) return;
+            currentTab = index;
+            tabContent.style.transform = `translateX(-${index * 33.333}%)`;
+            navItems.forEach((item, i) => {
+                item.classList.toggle('active', i === index);
+            });
+            if (index === 2) {
+                renderHistory();
+            }
+        }
 
-      if (!amountVal || !dateVal || !selectedCategory) {
-        alert('Harap lengkapi semua field.');
-        return;
-      }
+        navItems.forEach((item, i) => {
+            item.addEventListener('click', () => switchTab(i));
+        });
 
-      const amount = parseInt(amountVal);
-      if (amount <= 0) {
-        alert('Jumlah harus lebih dari 0.');
-        return;
-      }
+        // ===== Swipe Support =====
+        let startX = 0;
+        let isDragging = false;
 
-      const category = (selectedCategory === 'lainnya' && customCatVal) ? customCatVal : selectedCategory;
+        tabContent.addEventListener('touchstart', e => {
+            startX = e.touches[0].clientX;
+            isDragging = true;
+        });
 
-      const newTransaction = {
-        userId: currentUser.uid,
-        type: currentTransactionType,
-        amount: amount,
-        category: category,
-        date: dateVal,
-        timestamp: new Date()
-      };
+        tabContent.addEventListener('touchend', e => {
+            if (!isDragging) return;
+            isDragging = false;
+            const endX = e.changedTouches[0].clientX;
+            const diffX = startX - endX;
+            if (Math.abs(diffX) > 50) {
+                if (diffX > 0 && currentTab < 2) switchTab(currentTab + 1);
+                else if (diffX < 0 && currentTab > 0) switchTab(currentTab - 1);
+            }
+        });
 
-      try {
-        await db.collection('transactions').add(newTransaction);
-        showSuccessMessage('Transaksi berhasil ditambahkan!');
-        hideTransactionForm();
-        loadTransactions();
-        switchToTab('dashboardTab');
-      } catch (error) {
-        console.error('Gagal menambahkan transaksi:', error);
-        alert('Gagal menambahkan transaksi.');
-      }
-    }
+        // ===== Chart Setup =====
+        const ctx = document.getElementById('financeChart').getContext('2d');
+        financeChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: [],
+                datasets: [
+                    {
+                        label: 'Pemasukan',
+                        data: [],
+                        borderColor: '#48bb78',
+                        backgroundColor: 'rgba(72, 187, 120, 0.2)',
+                        fill: true,
+                        tension: 0.3,
+                        pointRadius: 3,
+                    },
+                    {
+                        label: 'Pengeluaran',
+                        data: [],
+                        borderColor: '#f56565',
+                        backgroundColor: 'rgba(245, 101, 101, 0.2)',
+                        fill: true,
+                        tension: 0.3,
+                        pointRadius: 3,
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: value => formatCurrency(value)
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        labels: {
+                            color: getComputedStyle(document.body).color
+                        }
+                    }
+                }
+            }
+        });
 
-    transactionFormElement.onsubmit = addTransactionHandler;
+        // ===== Update Chart Data =====
+        document.querySelectorAll('.chart-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                updateChartData(btn.dataset.period);
+            });
+        });
 
-    // ======= Settings Modal =======
-    const settingsModal = document.getElementById('settingsModal');
-    const openSettingsBtn = document.getElementById('openSettingsBtn');
+        function updateChartData(period) {
+            document.querySelectorAll('.chart-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.period === period);
+            });
 
-    openSettingsBtn.addEventListener('click', () => {
-      settingsModal.classList.add('active');
-    });
+            let labels = [];
+            let incomeData = [];
+            let expenseData = [];
 
-    settingsModal.addEventListener('click', (e) => {
-      if (e.target === settingsModal) closeSettings();
-    });
+            const now = new Date();
 
-    function closeSettings() {
-      settingsModal.classList.remove('active');
-    }
+            if (period === 'week') {
+                for (let i = 6; i >= 0; i--) {
+                    const day = new Date(now);
+                    day.setDate(now.getDate() - i);
+                    const dayStr = day.toISOString().slice(0, 10);
+                    labels.push(day.toLocaleDateString('id-ID', { weekday: 'short' }));
 
-    // ======= Account Info =======
-    document.getElementById('accountSettingsBtn').addEventListener('click', () => {
-      if (!currentUser) return alert('User tidak ditemukan.');
-      alert(`Nama: ${currentUser.displayName}\nEmail: ${currentUser.email}\n\nFitur update profil akan segera hadir.`);
-    });
+                    const incomeSum = transactions
+                        .filter(t => t.type === 'income' && t.date === dayStr)
+                        .reduce((sum, t) => sum + t.amount, 0);
+                    const expenseSum = transactions
+                        .filter(t => t.type === 'expense' && t.date === dayStr)
+                        .reduce((sum, t) => sum + t.amount, 0);
 
-    // ======= About =======
-    document.getElementById('aboutBtn').addEventListener('click', () => {
-      alert('Aplikasi Monitoring Keuangan\nDibuat oleh Al Fajrin Annas Alamsyah\nVersi 1.0');
-    });
+                    incomeData.push(incomeSum);
+                    expenseData.push(expenseSum);
+                }
+            } else if (period === 'month') {
+                const year = now.getFullYear();
+                const month = now.getMonth();
+                const daysInMonth = new Date(year, month + 1, 0).getDate();
 
-    // ======= Dark Mode Toggle =======
-    const darkModeToggle = document.getElementById('darkModeToggle');
+                for (let d = 1; d <= daysInMonth; d++) {
+                    const day = new Date(year, month, d);
+                    const dayStr = day.toISOString().slice(0, 10);
+                    labels.push(d.toString());
 
-    darkModeToggle.addEventListener('change', () => {
-      document.body.classList.toggle('dark', darkModeToggle.checked);
-      localStorage.setItem('darkMode', darkModeToggle.checked);
-    });
+                    const incomeSum = transactions
+                        .filter(t => t.type === 'income' && t.date === dayStr)
+                        .reduce((sum, t) => sum + t.amount, 0);
+                    const expenseSum = transactions
+                        .filter(t => t.type === 'expense' && t.date === dayStr)
+                        .reduce((sum, t) => sum + t.amount, 0);
 
-    // Load theme from localStorage
-    window.addEventListener('load', () => {
-      const darkModePref = localStorage.getItem('darkMode') === 'true';
-      if (darkModePref) {
-        document.body.classList.add('dark');
-        darkModeToggle.checked = true;
-      }
-    });
+                    incomeData.push(incomeSum);
+                    expenseData.push(expenseSum);
+                }
+            } else if (period === 'year') {
+                const year = now.getFullYear();
+                const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
 
-    // ======= Add Wallet (dummy) =======
-    document.getElementById('addWalletBtn').addEventListener('click', async () => {
-      const walletName = prompt('Masukkan nama dompet baru:');
-      if (!walletName) return;
-      alert(`Fitur tambah dompet akan segera hadir.\nAnda memasukkan: ${walletName}`);
-    });
+                for (let m = 0; m < 12; m++) {
+                    labels.push(monthNames[m]);
 
-  </script>
+                    const incomeSum = transactions
+                        .filter(t => t.type === 'income' && t.date.startsWith(`${year}-${String(m + 1).padStart(2, '0')}`))
+                        .reduce((sum, t) => sum + t.amount, 0);
+                    const expenseSum = transactions
+                        .filter(t => t.type === 'expense' && t.date.startsWith(`${year}-${String(m + 1).padStart(2, '0')}`))
+                        .reduce((sum, t) => sum + t.amount, 0);
+
+                    incomeData.push(incomeSum);
+                    expenseData.push(expenseSum);
+                }
+            }
+
+            financeChart.data.labels = labels;
+            financeChart.data.datasets[0].data = incomeData;
+            financeChart.data.datasets[1].data = expenseData;
+            financeChart.update();
+        }
+
+        // ===== Load Transactions from Firestore =====
+        async function loadTransactions() {
+            if (!currentUser) return;
+            try {
+                const snapshot = await db.collection('transactions')
+                    .where('userId', '==', currentUser.uid)
+                    .orderBy('date', 'desc')
+                    .get();
+
+                transactions = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                renderHistory();
+                updateDashboard();
+            } catch (error) {
+                console.error('Gagal memuat transaksi:', error);
+                alert('Gagal memuat data transaksi.');
+            }
+        }
+
+        // ===== Update Dashboard =====
+        function updateDashboard() {
+            let totalIncome = 0;
+            let totalExpense = 0;
+
+            transactions.forEach(t => {
+                if (t.type === 'income') totalIncome += t.amount;
+                else if (t.type === 'expense') totalExpense += t.amount;
+            });
+
+            const balance = totalIncome - totalExpense;
+
+            balanceAmount.textContent = formatCurrency(balance);
+            incomeAmount.textContent = formatCurrency(totalIncome);
+            expenseAmount.textContent = formatCurrency(totalExpense);
+
+            const todayStr = new Date().toISOString().slice(0, 10);
+            const todayInc = transactions.filter(t => t.type === 'income' && t.date === todayStr)
+                .reduce((sum, t) => sum + t.amount, 0);
+            const todayExp = transactions.filter(t => t.type === 'expense' && t.date === todayStr)
+                .reduce((sum, t) => sum + t.amount, 0);
+
+            todayIncome.textContent = formatCurrency(todayInc);
+            todayExpense.textContent = formatCurrency(todayExp);
+
+            // Update chart with current active period
+            const activeBtn = document.querySelector('.chart-btn.active');
+            if (activeBtn) {
+                updateChartData(activeBtn.dataset.period);
+            }
+        }
+
+        // ===== Transaction Buttons =====
+        transactionButtons.querySelectorAll('.transaction-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                currentTransactionType = btn.dataset.type;
+                showTransactionForm();
+                updateFormForType(currentTransactionType);
+            });
+        });
+
+        // ===== Show Transaction Form =====
+        function showTransactionForm() {
+            transactionButtons.style.display = 'none';
+            transactionForm.classList.add('active');
+            amountInput.value = '';
+            dateInput.value = new Date().toISOString().slice(0, 10);
+            customCategoryInput.value = '';
+            customCategoryGroup.style.display = 'none';
+            selectedCategory = null;
+            renderCategoryTags(currentTransactionType);
+            formTitle.textContent = currentTransactionType === 'income' ? '💰 Tambah Pemasukan' : '💸 Tambah Pengeluaran';
+            formTitle.style.color = currentTransactionType === 'income' ? '#48bb78' : '#f56565';
+            amountInput.focus();
+        }
+
+        backBtn.addEventListener('click', () => {
+            transactionButtons.style.display = 'flex';
+            transactionForm.classList.remove('active');
+        });
+
+        // ===== Render Category Tags =====
+        function renderCategoryTags(type) {
+            const incomeCategories = [
+                { name: 'gaji', icon: '💼' },
+                { name: 'bonus', icon: '🎁' },
+                { name: 'investasi', icon: '📈' },
+                { name: 'usaha', icon: '🏪' },
+                { name: 'lainnya', icon: '📝' }
+            ];
+            const expenseCategories = [
+                { name: 'belanja', icon: '🛒' },
+                { name: 'makan', icon: '🍽️' },
+                { name: 'transport', icon: '🚗' },
+                { name: 'bayar', icon: '💳' },
+                { name: 'lainnya', icon: '📝' }
+            ];
+            const categories = type === 'income' ? incomeCategories : expenseCategories;
+
+            categoryTagsContainer.innerHTML = '';
+            categories.forEach(cat => {
+                const tag = document.createElement('div');
+                tag.className = 'category-tag';
+                tag.dataset.category = cat.name;
+                tag.innerHTML = `<span>${cat.icon}</span> ${cat.name.charAt(0).toUpperCase() + cat.name.slice(1)}`;
+                tag.addEventListener('click', () => selectCategory(tag));
+                categoryTagsContainer.appendChild(tag);
+            });
+        }
+
+        // ===== Select Category =====
+        function selectCategory(tag) {
+            selectedCategory = tag.dataset.category;
+            document.querySelectorAll('.category-tag').forEach(t => t.classList.remove('selected'));
+            tag.classList.add('selected');
+            if (selectedCategory === 'lainnya') {
+                customCategoryGroup.style.display = 'block';
+                customCategoryInput.focus();
+            } else {
+                customCategoryGroup.style.display = 'none';
+                customCategoryInput.value = '';
+            }
+        }
+
+        // ===== Save Transaction =====
+        saveBtn.addEventListener('click', async () => {
+            let amountVal = amountInput.value.replace(/\D/g, '');
+            const dateVal = dateInput.value;
+            let categoryVal = selectedCategory;
+            const customCatVal = customCategoryInput.value.trim();
+
+            if (!amountVal || !dateVal || !categoryVal) {
+                alert('Mohon lengkapi semua field!');
+                return;
+            }
+
+            if (categoryVal === 'lainnya' && customCatVal) {
+                categoryVal = customCatVal;
+            } else if (categoryVal === 'lainnya' && !customCatVal) {
+                alert('Mohon isi kategori custom!');
+                return;
+            }
+
+            const amount = parseInt(amountVal);
+            if (amount <= 0) {
+                alert('Jumlah harus lebih dari 0!');
+                return;
+            }
+
+            const newTransaction = {
+                userId: currentUser.uid,
+                type: currentTransactionType,
+                amount,
+                category: categoryVal,
+                date: dateVal,
+                timestamp: firebase.firestore.FieldValue.serverTimestamp()
+            };
+
+            try {
+                await db.collection('transactions').add(newTransaction);
+                alert('Transaksi berhasil disimpan!');
+                amountInput.value = '';
+                customCategoryInput.value = '';
+                customCategoryGroup.style.display = 'none';
+                selectedCategory = null;
+                transactionButtons.style.display = 'flex';
+                transactionForm.classList.remove('active');
+                await loadTransactions();
+            } catch (error) {
+                console.error('Gagal menyimpan transaksi:', error);
+                alert('Gagal menyimpan transaksi!');
+            }
+        });
+
+        // ===== History Filtering and Rendering =====
+        historyFilter.addEventListener('change', renderHistory);
+        historyDate.addEventListener('change', renderHistory);
+        searchInput.addEventListener('input', renderHistory);
+
+        function renderHistory() {
+            const filter = historyFilter.value;
+            const filterDateVal = historyDate.value;
+            const searchVal = searchInput.value.toLowerCase();
+
+            let filtered = [...transactions];
+
+            if (filter === 'date' && filterDateVal) {
+                filtered = filtered.filter(t => t.date === filterDateVal);
+            } else if (filter === 'month' && filterDateVal) {
+                filtered = filtered.filter(t => t.date.slice(0,7) === filterDateVal.slice(0,7));
+            } else if (filter === 'year' && filterDateVal) {
+                filtered = filtered.filter(t => t.date.slice(0,4) === filterDateVal.slice(0,4));
+            }
+
+            if (searchVal) {
+                filtered = filtered.filter(t => t.category.toLowerCase().includes(searchVal));
+            }
+
+            historyList.innerHTML = '';
+
+            if (filtered.length === 0) {
+                historyList.innerHTML = `
+                    <div style="text-align: center; padding: 40px; color: #718096;">
+                        <div style="font-size: 48px; margin-bottom: 16px;">📊</div>
+                        <div>Tidak ada transaksi ditemukan</div>
+                    </div>
+                `;
+                return;
+            }
+
+            filtered.forEach(t => {
+                const isIncome = t.type === 'income';
+                const icon = getCategoryIcon(t.category.toLowerCase());
+                const color = isIncome ? '#48bb78' : '#f56565';
+                const prefix = isIncome ? '+' : '-';
+
+                const formattedDate = new Date(t.date).toLocaleDateString('id-ID', {
+                    day: 'numeric',
+                    month: 'long',
+                    year: 'numeric'
+                });
+
+                const item = document.createElement('div');
+                item.className = 'history-item fade-in';
+                item.innerHTML = `
+                    <div class="history-icon" style="background-color: ${color};">${icon}</div>
+                    <div class="history-details">
+                        <div class="history-category" style="color: ${color};">${capitalize(t.category)}</div>
+                        <div class="history-date">${formattedDate}</div>
+                    </div>
+                    <div class="history-amount" style="color: ${color};">${prefix}Rp ${formatNumber(t.amount)}</div>
+                `;
+                historyList.appendChild(item);
+            });
+        }
+
+        function getCategoryIcon(category) {
+            switch(category) {
+                case 'gaji': return '💼';
+                case 'bonus': return '🎁';
+                case 'investasi': return '📈';
+                case 'usaha': return '🏪';
+                case 'belanja': return '🛒';
+                case 'makan': return '🍽️';
+                case 'transport': return '🚗';
+                case 'bayar': return '💳';
+                case 'tabung': return '🏦';
+                case 'lainnya': return '📝';
+                default: return '❓';
+            }
+        }
+
+        function capitalize(text) {
+            if (!text) return '';
+            return text.charAt(0).toUpperCase() + text.slice(1);
+        }
+
+        // ===== Settings Modal =====
+        settingsBtn.addEventListener('click', () => {
+            settingsModal.classList.add('active');
+        });
+
+        settingsModal.addEventListener('click', (e) => {
+            if (e.target === settingsModal) {
+                settingsModal.classList.remove('active');
+            }
+        });
+
+        accountSettingsBtn.addEventListener('click', () => {
+            if (!currentUser) return alert('User tidak ditemukan.');
+            alert(`Nama: ${currentUser.displayName}\nEmail: ${currentUser.email}\n\nFitur update profil akan segera hadir.`);
+        });
+
+        aboutBtn.addEventListener('click', () => {
+            alert('Aplikasi Keuangan\nDibuat oleh Al Fajrin Annas Alamsyah\nVersi 1.0');
+        });
+
+        addWalletBtn.addEventListener('click', () => {
+            const walletName = prompt('Masukkan nama dompet baru:');
+            if (!walletName) return;
+            // Simpan dompet ke Firestore (opsional, implementasi dompet belum lengkap)
+            alert('Fitur tambah dompet akan segera hadir.');
+        });
+
+        // ===== Dark Mode Toggle =====
+        darkModeToggle.addEventListener('change', () => {
+            if (darkModeToggle.checked) {
+                document.body.classList.add('dark');
+                localStorage.setItem('darkMode', 'true');
+            } else {
+                document.body.classList.remove('dark');
+                localStorage.setItem('darkMode', 'false');
+            }
+        });
+
+        function loadThemePreference() {
+            const darkMode = localStorage.getItem('darkMode');
+            if (darkMode === 'true') {
+                document.body.classList.add('dark');
+                darkModeToggle.checked = true;
+            } else {
+                document.body.classList.remove('dark');
+                darkModeToggle.checked = false;
+            }
+        }
+
+        // ===== Format amount input =====
+        amountInput.addEventListener('input', () => {
+            let val = amountInput.value.replace(/\D/g, '');
+            if (val === '') {
+                amountInput.value = '';
+                return;
+            }
+            amountInput.value = formatNumber(parseInt(val));
+        });
+
+        // ===== Initialize default values =====
+        dateInput.value = new Date().toISOString().slice(0, 10);
+        historyDate.value = new Date().toISOString().slice(0, 10);
+
+    </script>
 </body>
 </html>
