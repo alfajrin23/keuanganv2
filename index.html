@@ -1065,14 +1065,30 @@
         async function loginWithGoogle() {
             const provider = new firebase.auth.GoogleAuthProvider();
             try {
+                console.log('Memulai login...');
                 const result = await auth.signInWithPopup(provider);
+                console.log('Login berhasil:', result.user);
                 currentUser = result.user;
                 isGuestMode = false;
                 showMainApp();
                 loadUserData();
             } catch (error) {
-                console.error('Login error:', error);
-                alert('Login gagal: ' + error.message);
+                console.error('Detail error:', error.code, error.message);
+                
+                // Handle specific errors
+                switch (error.code) {
+                    case 'auth/popup-closed-by-user':
+                        alert('Login dibatalkan');
+                        break;
+                    case 'auth/popup-blocked':
+                        alert('Popup diblokir browser. Izinkan popup untuk login');
+                        break;
+                    case 'auth/unauthorized-domain':
+                        alert('Domain tidak diotorisasi. Hubungi administrator');
+                        break;
+                    default:
+                        alert('Login gagal: ' + error.message);
+                }
             }
         }
 
