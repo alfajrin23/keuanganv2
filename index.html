@@ -1063,18 +1063,26 @@
 
         // Authentication Functions
         async function loginWithGoogle() {
+            const provider = new firebase.auth.GoogleAuthProvider();
             try {
-                const provider = new firebase.auth.GoogleAuthProvider();
-                const result = await auth.signInWithPopup(provider);
-                currentUser = result.user;
-                isGuestMode = false;
-                showMainApp();
-                loadUserData();
+                await auth.signInWithRedirect(provider);
+                auth.getRedirectResult().then((result) => {
+                    if (result.credential) {
+                        currentUser = result.user;
+                        isGuestMode = false;
+                        showMainApp();
+                        loadUserData();
+                    }
+                }).catch((error) => {
+                    console.error('Redirect login error:', error);
+                    alert('Login gagal. Silakan coba lagi.');
+                });
             } catch (error) {
                 console.error('Login error:', error);
                 alert('Login gagal. Silakan coba lagi.');
             }
         }
+
 
         function loginAsGuest() {
             isGuestMode = true;
