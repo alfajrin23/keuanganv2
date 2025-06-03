@@ -447,6 +447,7 @@
             box-shadow: var(--shadow);
         }
 
+        
         /* History Tab */
         .history-filters {
             display: flex;
@@ -809,7 +810,7 @@
         <!-- Main App -->
         <div class="main-app" id="mainApp">
             <div class="header">
-                <h1 class="header-title">🪙 Keuangan</h1>
+                <h1 class="header-title" id="headerTitle">🪙 Keuangan</h1>
                 <button class="settings-btn" id="settingsBtn">⚙️</button>
             </div>
 
@@ -1012,10 +1013,10 @@
             measurementId: "G-5PNCPF8TPV"
         };
 
-        // Initialize Firebase (Note: You'll need to replace with your actual config)
-        // firebase.initializeApp(firebaseConfig);
-        // const auth = firebase.auth();
-        // const db = firebase.firestore();
+        // Initialize Firebase - UNCOMMENT THESE LINES WHEN READY TO USE FIREBASE
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
 
         // App State
         let currentUser = null;
@@ -1153,19 +1154,43 @@
         }
 
         // Authentication Functions
-        function loginWithGoogle() {
-            // In a real app, implement Google OAuth
+        async function loginWithGoogle() {
             showLoading(document.getElementById('googleLogin'));
             
-            setTimeout(() => {
+            try {
+                const provider = new firebase.auth.GoogleAuthProvider();
+                const result = await auth.signInWithPopup(provider);
+                
                 currentUser = {
-                    name: 'John Doe',
-                    email: 'john.doe@gmail.com',
-                    photoURL: null,
+                    uid: result.user.uid,
+                    name: result.user.displayName,
+                    email: result.user.email,
+                    photoURL: result.user.photoURL,
                     isAnonymous: false
                 };
+                
+                // Load data from Firebase
+                await loadTransactionsFromFirebase();
                 showMainApp();
-            }, 1500);
+                showToast('Login berhasil!', 'success');
+                
+            } catch (error) {
+                console.error('Login error:', error);
+                showToast('Login gagal. Silakan coba lagi.', 'error');
+                
+                // Fallback untuk demo
+                setTimeout(() => {
+                    currentUser = {
+                        uid: 'demo_google_user',
+                        name: 'John Doe',
+                        email: 'john.doe@gmail.com',
+                        photoURL: null,
+                        isAnonymous: false
+                    };
+                    loadTransactionsFromFirebase();
+                    showMainApp();
+                }, 1000);
+            }
         }
 
         function loginAnonymously() {
@@ -1173,12 +1198,17 @@
             
             setTimeout(() => {
                 currentUser = {
+                    uid: 'anonymous_user',
                     name: 'Anonymous User',
                     email: 'anonymous@local',
                     photoURL: null,
                     isAnonymous: true
                 };
+                
+                // Load data from localStorage
+                loadTransactionsFromLocal();
                 showMainApp();
+                showToast('Login sebagai tamu berhasil!', 'success');
             }, 1000);
         }
 
@@ -1186,11 +1216,14 @@
             loginScreen.style.display = 'none';
             mainApp.style.display = 'flex';
             updateUserInfo();
-            loadTransactions();
             updateDashboard();
         }
 
         function logout() {
+            if (currentUser && !currentUser.isAnonymous) {
+                auth.signOut();
+            }
+            
             currentUser = null;
             currentTab = 0;
             transactions = [];
@@ -1201,6 +1234,167 @@
             
             // Reset tabs
             switchTab(0);
+        }
+
+        // Data Storage Functions
+        async function saveTransactionData(transaction) {
+            if (currentUser.isAnonymous) {
+                // Save to localStorage for anonymous users
+                transactions.push(transaction);
+                saveTransactionsToLocal();
+            } else {
+                // Save to Firebase for Google users
+                try {
+                    await db.collection('users').doc(currentUser.uid)
+                      .collection('transactions').add({
+                        ...transaction,
+                        userId: currentUser.uid,
+                        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                      });
+                    
+                    transactions.push(transaction);
+                    showToast('Transaksi tersimpan ke cloud!', 'success');
+                } catch (error) {
+                    console.error('Error saving to Firebase:', error);
+                    // Fallback to localStorage
+                    transactions.push(transaction);
+                    saveTransactionsToLocal();
+                    showToast('Transaksi tersimpan lokal (offline)', 'info');
+                }
+            }
+        }
+
+        async function updateTransactionData(transactionId, updatedTransaction) {
+            if (currentUser.isAnonymous) {
+                // Update in localStorage
+                const index = transactions.findIndex(t => t.id === transactionId);
+                if (index !== -1) {
+                    transactions[index] = updatedTransaction;
+                    saveTransactionsToLocal();
+                }
+            } else {
+                // Update in Firebase
+                try {
+                    const transactionRef = await findFirebaseTransaction(transactionId);
+                    if (transactionRef) {
+                        await transactionRef.update({
+                            ...updatedTransaction,
+                            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                        });
+                    }
+                    
+                    const index = transactions.findIndex(t => t.id === transactionId);
+                    if (index !== -1) {
+                        transactions[index] = updatedTransaction;
+                    }
+                    showToast('Transaksi diperbarui di cloud!', 'success');
+                } catch (error) {
+                    console.error('Error updating Firebase:', error);
+                    // Fallback to localStorage
+                    const index = transactions.findIndex(t => t.id === transactionId);
+                    if (index !== -1) {
+                        transactions[index] = updatedTransaction;
+                        saveTransactionsToLocal();
+                    }
+                    showToast('Transaksi diperbarui lokal (offline)', 'info');
+                }
+            }
+        }
+
+        async function deleteTransactionData(transactionId) {
+            if (currentUser.isAnonymous) {
+                // Delete from localStorage
+                transactions = transactions.filter(t => t.id !== transactionId);
+                saveTransactionsToLocal();
+            } else {
+                // Delete from Firebase
+                try {
+                    const transactionRef = await findFirebaseTransaction(transactionId);
+                    if (transactionRef) {
+                        await transactionRef.delete();
+                    }
+                    
+                    transactions = transactions.filter(t => t.id !== transactionId);
+                    showToast('Transaksi dihapus dari cloud!', 'success');
+                } catch (error) {
+                    console.error('Error deleting from Firebase:', error);
+                    // Fallback to localStorage
+                    transactions = transactions.filter(t => t.id !== transactionId);
+                    saveTransactionsToLocal();
+                    showToast('Transaksi dihapus lokal (offline)', 'info');
+                }
+            }
+        }
+
+        async function findFirebaseTransaction(transactionId) {
+            try {
+                const snapshot = await db.collection('users').doc(currentUser.uid)
+                  .collection('transactions')
+                  .where('id', '==', transactionId)
+                  .get();
+                
+                if (!snapshot.empty) {
+                    return snapshot.docs[0].ref;
+                }
+            } catch (error) {
+                console.error('Error finding transaction:', error);
+            }
+            return null;
+        }
+
+        function saveTransactionsToLocal() {
+            try {
+                localStorage.setItem(`transactions_${currentWallet}`, JSON.stringify(transactions));
+            } catch (error) {
+                console.error('Error saving to localStorage:', error);
+                showToast('Gagal menyimpan data lokal', 'error');
+            }
+        }
+
+        function loadTransactionsFromLocal() {
+            try {
+                const saved = localStorage.getItem(`transactions_${currentWallet}`);
+                if (saved) {
+                    transactions = JSON.parse(saved);
+                } else {
+                    loadSampleData();
+                }
+            } catch (error) {
+                console.error('Error loading from localStorage:', error);
+                loadSampleData();
+            }
+        }
+
+        async function loadTransactionsFromFirebase() {
+            try {
+                const snapshot = await db.collection('users').doc(currentUser.uid)
+                  .collection('transactions')
+                  .orderBy('createdAt', 'desc')
+                  .get();
+                
+                transactions = [];
+                snapshot.forEach(doc => {
+                    const data = doc.data();
+                    transactions.push({
+                        id: data.id,
+                        type: data.type,
+                        amount: data.amount,
+                        date: data.date,
+                        category: data.category,
+                        wallet: data.wallet || 'default'
+                    });
+                });
+                
+                if (transactions.length === 0) {
+                    loadSampleData();
+                }
+                
+            } catch (error) {
+                console.error('Error loading from Firebase:', error);
+                // Fallback to localStorage
+                loadTransactionsFromLocal();
+                showToast('Memuat data offline', 'info');
+            }
         }
 
         // Navigation Functions
@@ -1253,96 +1447,92 @@
 
         // Transaction Functions
         function showTransactionForm(type, transaction = null) {
-    currentTransactionType = type;
+            currentTransactionType = type;
 
-    // Hide buttons
-    document.getElementById('transactionButtons').style.display = 'none';
+            // Hide buttons
+            document.getElementById('transactionButtons').style.display = 'none';
 
-    // Show form
-    const form = document.getElementById('transactionForm');
-    form.style.display = 'block';
+            // Show form
+            const form = document.getElementById('transactionForm');
+            form.style.display = 'block';
 
-    // Update form title and categories
-    const title = document.getElementById('formTitle');
-    const categoryTags = document.getElementById('categoryTags');
+            // Update form title and categories
+            const title = document.getElementById('formTitle');
+            const categoryTags = document.getElementById('categoryTags');
 
-    // Clear previous category selections
-    document.querySelectorAll('.category-tag').forEach(tag => {
-        tag.classList.remove('selected');
-    });
+            // Clear previous category selections
+            document.querySelectorAll('.category-tag').forEach(tag => {
+                tag.classList.remove('selected');
+            });
 
-    if (type === 'income') {
-        title.textContent = '📈 Tambah Pemasukan';
-        title.style.color = 'var(--income-color)';
-        categoryTags.innerHTML = `
-            <div class="category-tag" data-category="gaji">💼 Gaji</div>
-            <div class="category-tag" data-category="bonus">🎁 Bonus</div>
-            <div class="category-tag" data-category="investasi">📊 Investasi</div>
-            <div class="category-tag" data-category="freelance">💻 Freelance</div>
-            <div class="category-tag" data-category="lainnya">📋 Lainnya</div>
-        `;
-    } else {
-        title.textContent = '📉 Tambah Pengeluaran';
-        title.style.color = 'var(--expense-color)';
-        categoryTags.innerHTML = `
-            <div class="category-tag" data-category="belanja">🛒 Belanja</div>
-            <div class="category-tag" data-category="makanan">🍽️ Makanan</div>
-            <div class="category-tag" data-category="transport">🚗 Transport</div>
-            <div class="category-tag" data-category="bayar">💳 Tagihan</div>
-            <div class="category-tag" data-category="hiburan">🎮 Hiburan</div>
-            <div class="category-tag" data-category="lainnya">📋 Lainnya</div>
-        `;
-    }
-
-    // If editing a transaction, fill the form with the transaction data
-    if (transaction) {
-        document.getElementById('amountInput').value = transaction.amount.toLocaleString('id-ID');
-        document.getElementById('dateInput').value = transaction.date;
-
-        // Select the category
-        categoryTags.querySelectorAll('.category-tag').forEach(tag => {
-            if (tag.getAttribute('data-category') === transaction.category) {
-                tag.classList.add('selected');
+            if (type === 'income') {
+                title.textContent = '📈 Tambah Pemasukan';
+                title.style.color = 'var(--income-color)';
+                categoryTags.innerHTML = `
+                    <div class="category-tag" data-category="gaji">💼 Gaji</div>
+                    <div class="category-tag" data-category="bonus">🎁 Bonus</div>
+                    <div class="category-tag" data-category="investasi">📊 Investasi</div>
+                    <div class="category-tag" data-category="freelance">💻 Freelance</div>
+                    <div class="category-tag" data-category="lainnya">📋 Lainnya</div>
+                `;
+            } else {
+                title.textContent = '📉 Tambah Pengeluaran';
+                title.style.color = 'var(--expense-color)';
+                categoryTags.innerHTML = `
+                    <div class="category-tag" data-category="belanja">🛒 Belanja</div>
+                    <div class="category-tag" data-category="makanan">🍽️ Makanan</div>
+                    <div class="category-tag" data-category="transport">🚗 Transport</div>
+                    <div class="category-tag" data-category="bayar">💳 Tagihan</div>
+                    <div class="category-tag" data-category="hiburan">🎮 Hiburan</div>
+                    <div class="category-tag" data-category="lainnya">📋 Lainnya</div>
+                `;
             }
-        });
 
-        // Show/hide custom input
-        const customInput = document.getElementById('customCategory');
-        if (transaction.category === 'lainnya') {
-            customInput.style.display = 'block';
-            customInput.value = transaction.category;
-        } else {
-            customInput.style.display = 'none';
+            // If editing a transaction, fill the form with the transaction data
+            if (transaction) {
+                document.getElementById('amountInput').value = transaction.amount.toLocaleString('id-ID');
+                document.getElementById('dateInput').value = transaction.date;
+
+                // Select the category
+                categoryTags.querySelectorAll('.category-tag').forEach(tag => {
+                    if (tag.getAttribute('data-category') === transaction.category) {
+                        tag.classList.add('selected');
+                    }
+                });
+
+                // Show/hide custom input
+                const customInput = document.getElementById('customCategory');
+                if (transaction.category === 'lainnya') {
+                    customInput.style.display = 'block';
+                    customInput.value = transaction.category;
+                } else {
+                    customInput.style.display = 'none';
+                }
+            } else {
+                // Reset form
+                document.getElementById('transactionFormElement').reset();
+                document.getElementById('customCategory').style.display = 'none';
+                document.getElementById('dateInput').value = new Date().toISOString().split('T')[0];
+            }
+
+            // Re-attach event listeners for new category tags
+            categoryTags.querySelectorAll('.category-tag').forEach(tag => {
+                tag.addEventListener('click', selectCategory);
+            });
+
+            // Add a back button only if it doesn't exist
+            if (!document.getElementById('backButton')) {
+                const backButton = document.createElement('button');
+                backButton.textContent = 'Kembali';
+                backButton.id = 'backButton';
+                backButton.className = 'save-btn';
+                backButton.onclick = function() {
+                    form.style.display = 'none';
+                    document.getElementById('transactionButtons').style.display = 'flex';
+                };
+                form.appendChild(backButton);
+            }
         }
-    } else {
-        // Reset form
-        document.getElementById('transactionFormElement').reset();
-        document.getElementById('customCategory').style.display = 'none';
-        document.getElementById('dateInput').value = new Date().toISOString().split('T')[0];
-    }
-
-    // Re-attach event listeners for new category tags
-    categoryTags.querySelectorAll('.category-tag').forEach(tag => {
-        tag.addEventListener('click', selectCategory);
-    });
-
-    // Add a back button only if it doesn't exist
-    if (!document.getElementById('backButton')) {
-        const backButton = document.createElement('button');
-        backButton.textContent = 'Kembali';
-        backButton.id = 'backButton';
-        backButton.className = 'save-btn';
-        backButton.onclick = function() {
-            form.style.display = 'none';
-            document.getElementById('transactionButtons').style.display = 'flex';
-        };
-        form.appendChild(backButton);
-    }
-}
-
-
-
-
 
         function selectCategory(e) {
             // Remove previous selection
@@ -1372,65 +1562,46 @@
             e.target.value = value;
         }
 
-        // Update the saveTransaction function to handle both adding and editing
-function saveTransaction(e) {
-    e.preventDefault();
+        // Update the saveTransaction function to use new storage methods
+        async function saveTransaction(e) {
+            e.preventDefault();
 
-    const amount = document.getElementById('amountInput').value.replace(/[^\d]/g, '');
-    const date = document.getElementById('dateInput').value;
-    const selectedCategory = document.querySelector('.category-tag.selected');
-    const customCategory = document.getElementById('customCategory').value;
+            const amount = document.getElementById('amountInput').value.replace(/[^\d]/g, '');
+            const date = document.getElementById('dateInput').value;
+            const selectedCategory = document.querySelector('.category-tag.selected');
+            const customCategory = document.getElementById('customCategory').value;
 
-    if (!amount || !date || !selectedCategory) {
-        alert('Mohon lengkapi semua field!');
-        return;
-    }
+            if (!amount || !date || !selectedCategory) {
+                alert('Mohon lengkapi semua field!');
+                return;
+            }
 
-    const category = selectedCategory.getAttribute('data-category') === 'lainnya'
-        ? customCategory || 'Lainnya'
-        : selectedCategory.textContent.trim();
+            const category = selectedCategory.getAttribute('data-category') === 'lainnya'
+                ? customCategory || 'Lainnya'
+                : selectedCategory.textContent.trim();
 
-    if (currentTransactionType) {
-        // If editing an existing transaction
-        const transactionIndex = transactions.findIndex(t => t.id === transaction.id);
-        transactions[transactionIndex] = {
-            id: transaction.id,
-            type: currentTransactionType,
-            amount: parseInt(amount),
-            date: date,
-            category: category,
-            wallet: currentWallet,
-            timestamp: new Date()
-        };
-    } else {
-        // Add new transaction
-        const transaction = {
-            id: Date.now().toString(),
-            type: currentTransactionType,
-            amount: parseInt(amount),
-            date: date,
-            category: category,
-            wallet: currentWallet,
-            timestamp: new Date()
-        };
-        transactions.push(transaction);
-    }
+            const transaction = {
+                id: Date.now().toString(),
+                type: currentTransactionType,
+                amount: parseInt(amount),
+                date: date,
+                category: category,
+                wallet: currentWallet,
+                timestamp: new Date()
+            };
 
-    // Save to localStorage for demo
-    localStorage.setItem(`transactions_${currentWallet}`, JSON.stringify(transactions));
+            // Save using appropriate method
+            await saveTransactionData(transaction);
 
-    // Reset form
-    document.getElementById('transactionFormElement').reset();
-    document.getElementById('customCategory').style.display = 'none';
-    document.getElementById('transactionForm').style.display = 'none';
-    document.getElementById('transactionButtons').style.display = 'flex';
+            // Reset form
+            document.getElementById('transactionFormElement').reset();
+            document.getElementById('customCategory').style.display = 'none';
+            document.getElementById('transactionForm').style.display = 'none';
+            document.getElementById('transactionButtons').style.display = 'flex';
 
-    // Update dashboard
-    updateDashboard();
-
-    // Show success message
-    showToast('Transaksi berhasil disimpan!', 'success');
-}
+            // Update dashboard
+            updateDashboard();
+        }
 
         // Dashboard Functions
         function updateDashboard() {
