@@ -1064,27 +1064,44 @@
         // Authentication Functions
         async function loginWithGoogle() {
             const provider = new firebase.auth.GoogleAuthProvider();
+            
+            // Tambahkan scope jika diperlukan
+            provider.addScope('profile');
+            provider.addScope('email');
+            
             try {
-                console.log('Memulai login...');
+                console.log('Memulai login dengan Google...');
+                
+                // Gunakan popup instead of redirect
                 const result = await auth.signInWithPopup(provider);
+                
                 console.log('Login berhasil:', result.user);
                 currentUser = result.user;
                 isGuestMode = false;
-                showMainApp();
-                loadUserData();
-            } catch (error) {
-                console.error('Detail error:', error.code, error.message);
                 
-                // Handle specific errors
+                // Langsung pindah ke main app
+                showMainApp();
+                await loadUserData();
+                
+            } catch (error) {
+                console.error('Login error:', error);
+                
+                // Handle specific error codes
                 switch (error.code) {
                     case 'auth/popup-closed-by-user':
-                        alert('Login dibatalkan');
+                        alert('Login dibatalkan oleh pengguna');
                         break;
                     case 'auth/popup-blocked':
-                        alert('Popup diblokir browser. Izinkan popup untuk login');
+                        alert('Popup diblokir browser. Harap izinkan popup dan coba lagi');
+                        break;
+                    case 'auth/cancelled-popup-request':
+                        console.log('Popup request cancelled');
                         break;
                     case 'auth/unauthorized-domain':
                         alert('Domain tidak diotorisasi. Hubungi administrator');
+                        break;
+                    case 'auth/network-request-failed':
+                        alert('Koneksi internet bermasalah. Coba lagi');
                         break;
                     default:
                         alert('Login gagal: ' + error.message);
