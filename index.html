@@ -17,8 +17,8 @@
         }
         
         :root {
-            --primary-color: #2196F3;
-            --secondary-color: #4CAF50;
+            --primary-color: #4CAF50;
+            --secondary-color: #2196F3;
             --danger-color: #f44336;
             --warning-color: #FF9800;
             --success-color: #4CAF50;
@@ -812,7 +812,7 @@
     <div id="mainApp" class="container hidden">
         <!-- Header -->
         <div class="header">
-            <h1 class="header-title" id="headerTitle"> 🪙 Keuangan</h1>
+            <h1 class="header-title" id="headerTitle">Keuangan</h1>
             <button class="settings-btn" onclick="openSettings()">
                 <i class="fas fa-cog"></i>
             </button>
@@ -1148,8 +1148,27 @@
                 // Destroy chart before login to prevent conflicts
                 destroyExistingChart();
                 
-                // Gunakan popup instead of redirect
-                const result = await auth.signInWithPopup(provider);
+                // Deteksi jika di mobile/webview
+                const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+                const isWebView = /wv|WebView/i.test(navigator.userAgent);
+                
+                let result;
+                
+                if (isMobile || isWebView) {
+                    // Untuk mobile/webview, gunakan redirect
+                    try {
+                        await auth.signInWithRedirect(provider);
+                        // Setelah redirect, akan ditangani oleh onAuthStateChanged
+                        return;
+                    } catch (redirectError) {
+                        console.log('Redirect failed, trying popup:', redirectError);
+                        // Jika redirect gagal, fallback ke popup
+                        result = await auth.signInWithPopup(provider);
+                    }
+                } else {
+                    // Untuk desktop browser, gunakan popup
+                    result = await auth.signInWithPopup(provider);
+                }
                 
                 console.log('Login berhasil:', result.user);
                 currentUser = result.user;
@@ -1179,8 +1198,13 @@
                     case 'auth/network-request-failed':
                         alert('Koneksi internet bermasalah. Coba lagi');
                         break;
+                    case 'auth/operation-not-allowed':
+                        alert('Google Sign-In belum diaktifkan di Firebase Console');
+                        break;
                     default:
                         alert('Login gagal: ' + error.message);
+                        // Fallback ke guest mode jika login gagal
+                        console.log('Memberikan opsi guest mode...');
                 }
             }
         }
